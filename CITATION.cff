@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: "CORTEX-12"
+message: "If you use this software, please cite it."
+authors:
+  - family-names: Taylor
+    given-names: John
+version: 12.0
+date-released: 2026-01-20
+license: MIT
