@@ -1,0 +1,12 @@
+flowchart LR
+  M["memory_vector_v12.json<br/>concept -> attrs"] --> R["render(attrs)<br/>deterministic draw"]
+  R --> F["Frozen DINOv2 f() (LOCKED)"]
+  F --> G["Adapter g_theta()<br/>z in R^128"]
+  G --> V["Cached concept vectors v_c"]
+
+  Q["Query image x_q"] --> Fq["Frozen DINOv2 f() (LOCKED)"]
+  Fq --> Gq["Adapter g_theta()"]
+  Gq --> Zq["z_q"]
+
+  Zq --> Sim["Retrieve<br/>argmax cosine_sim(z_q, v_c)"]
+  V --> Sim

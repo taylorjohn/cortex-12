@@ -1,0 +1,22 @@
+flowchart LR
+  subgraph SYNTH["Synthetic lane (anchoring)"]
+    R["Deterministic renderer<br/>(shape/color/size/pos)"] --> Xs["Synthetic images x_s"]
+    Xs --> F1["Frozen DINOv2 backbone f() (LOCKED)"]
+    F1 --> G1["Trainable adapter g_theta()"]
+    G1 --> Zs["Latents z_s in R^128"]
+    Zs --> Lsup["L_sup<br/>(axis anchoring)"]
+    Zs --> LnceS["L_synthNCE<br/>(contrastive on concepts)"]
+  end
+
+  subgraph REAL["Real lane (Tiny-ImageNet)"]
+    Tr["Real images x_r"] --> AugR["Two views<br/>t1(x), t2(x)"]
+    AugR --> F2["Frozen DINOv2 backbone f() (LOCKED)"]
+    F2 --> G2["Trainable adapter g_theta()"]
+    G2 --> Zr["Latents z_r in R^128"]
+    Zr --> Lntx["L_realNTX<br/>(NT-Xent on views)"]
+  end
+
+  Lsup --> Sum["Weighted sum loss<br/>L = lam_sup*L_sup + lam_sNCE*L_synthNCE + lam_rNTX*L_realNTX"]
+  LnceS --> Sum
+  Lntx --> Sum
+  Sum --> Opt["Optimizer step<br/>update theta only"]

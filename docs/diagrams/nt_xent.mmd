@@ -1,0 +1,10 @@
+flowchart TB
+  A["z_i (anchor)"] --> P["z_j (positive)"]
+  A --> N1["z_k (negative)"]
+  A --> N2["z_m (negative)"]
+  A --> N3["z_n (negative)"]
+
+  P --> Pull["Pull together<br/>increase sim"]
+  N1 --> Push["Push apart<br/>decrease sim"]
+  N2 --> Push
+  N3 --> Push

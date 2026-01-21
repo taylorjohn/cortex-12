@@ -1,0 +1,10 @@
+flowchart TB
+  A["Sample SAME and DIFF pairs"] --> S["SAME stats<br/>E(sim), std"]
+  A --> D["DIFF stats<br/>E(sim), std"]
+
+  S --> Gap["Separation<br/>Δ = S - D"]
+  D --> Gap
+
+  Gap --> H{Healthy?}
+  H -->|Yes| OK["Stable geometry<br/>Δ > 0, low variance"]
+  H -->|No| Bad["Collapse / drift<br/>DIFF rises or variance explodes"]
