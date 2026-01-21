@@ -148,5 +148,20 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 ```
 
 ---
+## Diagrams testing
 
+![Two-world training diagram](docs/diagrams/training_two_worlds.svg)
 
+![Geometry stability](docs/diagrams/geometry_contract.svg)
+
+![External memory loop](diagrams/external_memory_loop.svg)
+
+![NT-Xent intuition](docs/diagrams/nt_xent.svg)
+
+The contrastive objective minimizes:
+
+$$
+\mathcal{L}_{i} = -\log
+\frac{\exp(\text{sim}(z_i,z_j)/\tau)}
+{\sum_{k\neq i}\exp(\text{sim}(z_i,z_k)/\tau)}
+$$
