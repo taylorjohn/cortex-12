@@ -1,4 +1,4 @@
-# cortex-12
+# CORTEX-12
 
 ### A Compact Visual Cortex for Grounded, Neuro-Symbolic Reasoning (CPU-Only)
 
