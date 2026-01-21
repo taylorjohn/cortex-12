@@ -1,0 +1,23 @@
+# Core
+python>=3.10
+
+# PyTorch (CPU-only recommended)
+torch>=2.1
+torchvision
+torchaudio
+
+# Numeric / ML
+numpy
+scipy
+scikit-learn
+
+# Image & visualization
+Pillow
+matplotlib
+
+# Utilities
+tqdm
+einops
+
+# Optional (safe, lightweight)
+requests
