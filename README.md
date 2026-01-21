@@ -158,7 +158,7 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 
 ![Geometry stability](docs/diagrams/geometry_contract.svg)
 
-![External memory loop](diagrams/external_memory_loop.svg)
+![External memory loop](docs/diagrams/external_memory_loop.svg)
 
 ![NT-Xent intuition](docs/diagrams/nt_xent.svg)
 
