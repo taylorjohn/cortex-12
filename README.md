@@ -6,6 +6,7 @@
 <p align="center">
   <img src="Cortex-12_logo.png" alt="Cortex-12 Logo" width="800"/>
 </p>
+
 ## A Compact Visual Cortex for Grounded, Neuro-Symbolic Reasoning
 
 **CORTEX-12** is a CPU-only visual cortex that learns stable, interpretable
