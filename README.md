@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)]
 
 <p align="center">
-  <img src="Cortex-12_logo.png" alt="Cortex-12 Logo" width="420"/>
+  <img src="Cortex-12_logo.png" alt="Cortex-12 Logo" width="800"/>
 </p>
 ## A Compact Visual Cortex for Grounded, Neuro-Symbolic Reasoning
 
