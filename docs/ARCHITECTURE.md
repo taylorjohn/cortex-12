@@ -6,6 +6,10 @@ perceptual backbone and a small, interpretable latent representation layer.
 The architecture explicitly separates **perception**, **representation**,
 and **memory**.
 
+
+## Architecture Diagram (SVG)
+
+![CORTEX-12 Architecture](architecture.svg)
 ---
 
 ## High-Level Architecture
