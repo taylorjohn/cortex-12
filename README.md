@@ -1,16 +1,79 @@
 # CORTEX-12
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Compute: CPU Only](https://img.shields.io/badge/Compute-CPU--Only-blue.svg)]
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)]
 
-### A Compact Visual Cortex for Grounded, Neuro-Symbolic Reasoning (CPU-Only)
+## A Compact Visual Cortex for Grounded, Neuro-Symbolic Reasoning
 
-CORTEX-12 is a compact, interpretable **visual cortex** built on JEPA principles.
-It learns stable, low-dimensional vector representations for objects and scenes,
-supports explicit memory and comparison, and adapts to real images using
-contrastive self-supervision — all on **CPU-only hardware** rather than end-to-end prediction.
-
-This project prioritizes **representation stability, interpretability, and
-reproducibility** over scale.
+**CORTEX-12** is a CPU-only visual cortex that learns stable, interpretable
+vector representations for grounded perception using JEPA principles,
+contrastive alignment, and explicit memory. It prioritizes **clarity,
+stability, and reproducibility** over scale or benchmark performance.
 
 ---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Core Capabilities](#core-capabilities)
+- [Why CORTEX-12](#why-cortex-12)
+- [Quick Start](#quick-start)
+- [Phase-2 Training](#phase-2-training)
+- [Use Cases](#use-cases)
+- [Evaluation Philosophy](#evaluation-philosophy)
+- [Contributing](#contributing)
+- [License](#license)
+- [Citation](#citation)
+
+---
+
+## Overview
+
+CORTEX-12 is designed as a **representation substrate** rather than an
+end-to-end agent:
+
+- Learns **128-dim visual embeddings** from pixels  
+- Supports **interpretable semantic axes** (color, shape, size)  
+- Uses **explicit external memory** rather than implicit weights  
+- Safe for long unattended CPU training
+
+Unlike large models, CORTEX-12 is **simple, inspectable, and deterministic**.
+
+---
+
+## Core Capabilities
+
+- RGB images → compact vector embeddings  
+- Explicit semantic attributes (color/shape/size)  
+- Stable similarity comparisons across checkpoints  
+- Compositional imagination via structured rendering  
+- CPU-only execution (AMD-friendly)
+
+---
+
+## Why CORTEX-12
+
+**Not a large language model, generative model, or foundation model.**  
+Rather, CORTEX-12 focuses on:
+- **Grounded perception** with explicit memory
+- **Interpretable geometry** instead of opaque weight embeddings
+- **Representation stability** over competitive accuracy
+
+This makes it suitable as **a visual cortex module** rather than a
+standalone task solver.
+
+---
+
+## Quick Start
+
+### Setup (Windows PowerShell)
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install --upgrade pip
+pip install -r requirements.txt
+```
 
 ## What CORTEX-12 Is (and Is Not)
 
