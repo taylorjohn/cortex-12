@@ -150,7 +150,20 @@ pip install -r requirements.txt
 ```
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 ```
+## Verifiable Perception via Semantic Axis Certification
 
+CORTEX-12 supports **semantic axis certification**—a method to make its 128-d embeddings interpretable and auditable.
+
+### Quick Start
+```bash
+# Generate synthetic validation data
+python tools/generate_certification_data.py
+
+# Certify color, shape, and size axes
+python tools/certify_cortex12.py
+
+# Run a verifiable perception demo
+python examples/verify_perception.py
 ---
 ## Diagrams testing
 
