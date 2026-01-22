@@ -288,6 +288,119 @@ CORTEX-12 proves that **you don’t need scale to build systems that are simple,
 
 *For implementation details, see [`cortex12/semantic_axes.py`](../cortex12/semantic_axes.py) and the [certification tools](../tools/).*
 
+
+
+
+
+## 🚧 Training Progress (Phase 2)
+
+**Status:** In progress  
+**Dataset:** Tiny-ImageNet-200  
+**Backbone:** DINOv2 ViT-S/14 (loaded via `torch.hub`)  
+**Device:** CPU  
+**Checkpoint Type:** Cortex head + concept memory (partial; backbone external)
+
+---
+
+### 📍 Mid-Phase-2 Milestone (~Step 5,600 / 12,000)
+
+A mid-run checkpoint (`cortex_step05600.pt`) was evaluated to validate representation stability, concept separation, and overall system health.
+
+---
+
+### ✅ Load & Structural Integrity
+
+- Checkpoint loads successfully in eval mode
+- Cortex weights load as a **partial state_dict** (expected by design)
+- Concept memory loads correctly
+- Forward pass produces valid tensor shapes
+- No NaNs or shape mismatches observed
+
+**Smoke Test Output:**
+
+feat: [1, 128]
+pc:   [1, 19]
+ps:   [1, 25]
+pz:   [1, 4]
+sides:[1, 1]
+OK
+
+---
+
+### ✅ Representation Stability (Automated)
+
+`test_v12_compare_stability.py` was run against the checkpoint.
+
+**Results:**
+
+SAME  mean = 0.9887   std = 0.0027
+DIFF  mean = 0.5720   std = 0.0100
+OK Compare stability verified
+
+
+**Interpretation:**
+- Extremely high self-similarity with very low variance → **stable embeddings**
+- Clear separation between different concepts
+- No evidence of representation collapse or drift
+
+---
+
+### 🧠 Manual Concept Geometry Probes
+
+Manual evaluations were performed using the interactive eval interface.
+
+| Comparison | Similarity (↑ = closer) | Interpretation |
+|-----------|--------------------------|---------------|
+| ruby ↔ ruby | ~0.974 | High self-consistency |
+| ruby ↔ ruby_big | ~0.865 | Size encoded as a separable attribute |
+| ruby ↔ emerald | ~0.78 | Color separation present but weaker |
+| ruby ↔ green_diamond | ~0.78 | Confirms color is a lower-weight axis |
+| ruby ↔ red_square | ~0.75 | Shape difference dominates separation |
+
+**Key Insight:**  
+At this stage, the model prioritizes **object structure / shape**, followed by **size**, with **color encoded but less dominant**. This behavior is consistent with expected JEPA-style training dynamics, where structural identity stabilizes before fine-grained attribute disentanglement.
+
+---
+
+### 🎨 Scene Composition Check
+
+The imagination / composition pathway was verified:
+
+[SCENE] GENERATED: objects=2 complexity=1.17
+
+Repeated runs produced consistent outputs, confirming deterministic behavior and a functioning composition pipeline.
+
+---
+
+### 📦 Checkpoint Characteristics
+
+- File size: ~680 KB
+- Contains:
+  - Cortex projection / adapter weights
+  - Concept memory state
+- Does **not** include backbone weights (loaded from `torch.hub`)
+
+This design allows fast copying, versioning, and evaluation without duplicating large backbone files.
+
+---
+
+### 📈 Summary (Step ~5600)
+
+At this mid-Phase-2 checkpoint, the model demonstrates:
+
+- ✅ Stable representations
+- ✅ Clear concept separation
+- ✅ Sensible attribute geometry (shape > size > color)
+- ✅ Fully operational eval and tooling stack
+
+This checkpoint serves as a **baseline reference** for later Phase-2 checkpoints (e.g. ~8k, ~10k, ~12k), where further attribute disentanglement—particularly color—is expected.
+
+
+
+
+
+
+
 ---
 ## Diagrams testing
 
