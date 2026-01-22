@@ -164,6 +164,9 @@ python tools/certify_cortex12.py
 
 # Run a verifiable perception demo
 python examples/verify_perception.py
+Start
+```
+
 ---
 ## Diagrams testing
 
