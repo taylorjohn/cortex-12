@@ -1,44 +1,60 @@
-# Model Card: CORTEX-12 (VL-JEPA v12) (Conference Version)
+# Model Card: CORTEX-12
 
-## Key Claim
-
-**Incorporating real-image exposure during Phase-2 training significantly improves perceptual invariance to real-world variation without degrading or destabilizing the learned symbolic concept space.**
-
----
-
-## Abstract
-
-CORTEX-12 is a neuro-symbolic vision–language agent designed to disentangle *perceptual grounding* from *symbolic structure*. The system combines a frozen self-supervised vision backbone (DINOv2) with a lightweight, trainable symbolic cortex optimized for stability, compositionality, and invariance. We evaluate the contribution of real-image exposure via a controlled ablation on Tiny-ImageNet, demonstrating that real images improve perceptual invariance while leaving symbolic geometry unchanged. These results support a staged training paradigm in which perceptual robustness and symbolic organization are learned under distinct objectives.
+## Key Claim (TL;DR)
+**CORTEX-12 learns a stable symbolic representation space whose invariances are significantly improved by exposure to real images, without sacrificing symbolic discrimination or collapsing geometry.**
 
 ---
 
 ## Model Overview
 
-**Architecture.** CORTEX-12 consists of:
+**Model name:** CORTEX-12  
+**Former name:** VL-JEPA v12  
+**Version:** Phase-2 Final  
+**Checkpoint:** `cortex_final.pt`  
 
-* A frozen DINOv2 ViT-S/14 backbone for perceptual feature extraction
-* A trainable "cortex" module mapping perceptual embeddings into a symbolic concept space
-* A lightweight neuro-symbolic interface supporting concept learning, comparison, and composition
+CORTEX-12 is a neuro-symbolic visual representation model trained to align symbolic concepts with visual embeddings while preserving invariance, compositionality, and geometric stability. The model combines a frozen self-supervised vision backbone with a lightweight symbolic cortex trained via contrastive and supervised objectives.
 
-**Design Principle.** Symbolic stability is treated as a *first-class constraint*. The model is explicitly designed so that perceptual updates do not distort the relative geometry of learned concepts.
+The design goal is not end-to-end perception, but **stable symbolic grounding**: concepts should remain distinguishable, comparable, and invariant under nuisance transformations.
+
+---
+
+## Architecture
+
+- **Vision backbone:** DINOv2 ViT-S/14 (frozen)
+- **Trainable components:** Symbolic cortex adapters + concept heads
+- **Output spaces:**
+  - Visual feature embedding (128-D)
+  - Concept logits
+  - Size, shape, and relational heads
+
+Only the cortex and symbolic heads are trained; the vision backbone remains fixed.
+
+---
+
+## Training Data
+
+### Synthetic Data
+Procedurally generated symbolic scenes used to define explicit concepts (e.g., color, shape, size).
+
+### Real Images
+**Tiny-ImageNet-200** is used *only* to encourage invariance and robustness in the visual embedding space. No class labels are used.
+
+### Ablation
+A matched **no-real-images** training run (synthetic-only) is used to isolate the effect of real visual data on invariance.
 
 ---
 
 ## Training Procedure
 
-### Phase 1 (Synthetic Pretraining)
-
-* Procedurally generated shapes, colors, sizes, and positions
-* Objectives: concept separation, SAME/DIFF stability, compositional consistency
-
-### Phase 2 (Grounding / Invariance)
-
-Two variants were trained:
-
-1. **With Real Images:** Phase-1 objectives + Tiny-ImageNet samples
-2. **No-Real Ablation:** Phase-1 objectives only (synthetic data)
-
-Both variants were trained with identical hyperparameters and evaluation schedules.
+- **Total Phase-2 steps:** 12,000
+- **Optimizer:** AdamW
+- **Backbone:** Frozen throughout training
+- **Losses:**
+  - Supervised symbolic loss
+  - Synthetic contrastive loss
+  - Real-image contrastive (NT-Xent) loss
+- **Checkpoints:** Saved every 200 steps
+- **Final artifact:** `cortex_final.pt` (adapter + heads only)
 
 ---
 
@@ -46,80 +62,103 @@ Both variants were trained with identical hyperparameters and evaluation schedul
 
 ### 1. Symbolic Stability (Compare-Stability Test)
 
-Measures whether symbolic SAME/DIFF relationships remain consistent under sampling and jitter.
+Measures whether identical concepts remain close and distinct concepts remain separated under random jitter.
 
-**Results (Step 1k):**
+**Final checkpoint (`cortex_final.pt`):**
 
-| Training Variant | SAME (↑)        | DIFF (↓)        |
-| ---------------- | --------------- | --------------- |
-| No Real Images   | 0.9884 ± 0.0021 | 0.5712 ± 0.0131 |
-| With Real Images | 0.9886 ± 0.0022 | 0.5727 ± 0.0101 |
+- **SAME:** 0.9880 ± 0.0027  
+- **DIFF:** 0.5706 ± 0.0082  
 
-**Observation.** Symbolic geometry is statistically indistinguishable across variants, indicating that real-image exposure does not destabilize learned concepts.
+This confirms a well-structured symbolic embedding space with low variance and no collapse.
 
 ---
 
 ### 2. Real-Image Invariance (Tiny-ImageNet)
 
-Measures cosine similarity between embeddings of perturbed views of the same real image.
+Measures cosine similarity between embeddings of two independently augmented views of the same real image.
 
-**Results (n = 256):**
+- **Metric:** Mean cosine similarity
+- **Samples:** n = 256
+- **Seed:** 0
 
-| Training Variant | Mean Invariance (↑) | Std (↓) |
-| ---------------- | ------------------- | ------- |
-| No Real Images   | 0.6855              | 0.2152  |
-| With Real Images | 0.8353              | 0.1266  |
+| Model Variant | REAL-INVAR (mean ± std) |
+|--------------|-------------------------|
+| No-real (1k) | 0.6855 ± 0.2152 |
+| With-real (1k) | 0.8353 ± 0.1266 |
+| **With-real (final)** | **0.8608 ± 0.1158** |
 
-**Observation.** Real-image exposure yields a large absolute gain in invariance (+0.15) and substantially reduces variance, indicating more consistent perceptual grounding.
+**Observation:**  
+Exposure to real images produces a **large and persistent improvement** in invariance (+0.175 over no-real), while maintaining symbolic discrimination.
 
 ---
 
-## Ablation Claim
+### 3. Semantic Probe Consistency
 
-The ablation demonstrates a clean separation of effects:
+Manual symbolic probes demonstrate correct relational ordering:
 
-* **What improves:** perceptual invariance to real-world variation
-* **What remains unchanged:** symbolic structure, SAME/DIFF geometry, and stability
+| Comparison | Similarity |
+|-----------|------------|
+| ruby ↔ ruby | 0.9765 |
+| ruby ↔ ruby_big | 0.8659 |
+| ruby ↔ green_diamond | 0.7864 |
+| ruby ↔ red_square | 0.7527 |
 
-This supports the hypothesis that perceptual grounding can be improved without entangling or corrupting symbolic representations.
+The ordering matches expected semantic proximity: identity > size > color > shape.
+
+---
+
+## Ablation Summary
+
+The **synthetic-only** model achieves strong symbolic stability but **fails to generalize invariance to real images**. Adding unlabeled real images improves invariance substantially without degrading symbolic structure.
+
+This supports the claim that **real data is not required for symbol learning, but is critical for invariance**.
 
 ---
 
 ## Failure Modes & Limitations
 
-* **No symbolic margin gains:** Real images do not widen symbolic separation or improve concept discrimination.
-* **Invariance ≠ semantics:** Improvements reflect robustness to visual perturbations, not semantic reasoning.
-* **Single-domain evaluation:** Real-image tests are limited to Tiny-ImageNet; broader domain transfer is untested.
-* **Ceiling effects in stability metrics:** SAME/DIFF metrics saturate early and may obscure later regressions.
-
-These limitations are intentional consequences of the phased training design.
+- **No end-to-end perception:** The model relies on a frozen backbone and does not learn low-level visual features.
+- **Limited semantic richness:** Concepts are simple and compositional; abstract or high-level semantics are out of scope.
+- **Invariance ceiling:** Invariance improves with real data but saturates; further gains may require backbone adaptation.
+- **Not a classifier:** CORTEX-12 is not designed for ImageNet-style classification tasks.
+- **No temporal reasoning:** The model does not process video or sequential data.
 
 ---
 
 ## Intended Use
 
-CORTEX-12 is intended as a research system for:
+- Neuro-symbolic research
+- Representation learning analysis
+- Grounded concept learning
+- Invariance and compositionality studies
 
-* Studying perceptual–symbolic decoupling
-* Evaluating invariance without symbolic drift
-* Prototyping staged neuro-symbolic learning pipelines
-
-It is **not** intended as a general-purpose vision–language model or end-to-end LLM.
-
----
-
-## Broader Impact
-
-This work suggests that symbolic reasoning systems can be grounded in real perception without sacrificing stability, supporting modular and interpretable alternatives to monolithic end-to-end models.
+**Not intended for:**  
+Safety-critical perception, real-world deployment, or production inference.
 
 ---
 
 ## Reproducibility
 
-All evaluations are script-driven and checkpointed. Ablation checkpoints, evaluation scripts, and fixed seeds are provided to enable exact reproduction of reported metrics.
+All reported metrics are produced by scripts included in the repository:
+
+- `test_v12_smoke.py`
+- `test_v12_compare_stability.py`
+- `eval_real_invariance.py`
+
+The final checkpoint is evaluated with no fine-tuning or test-time adaptation.
 
 ---
 
-## Summary
+## Citation
 
-CORTEX-12 provides empirical evidence that perceptual grounding and symbolic organization can be trained as separable objectives. Real images improve invariance; symbols remain stable. This separation enables controlled scaling toward more robust neuro-symbolic agents.
+If you reference this model, please cite as:
+
+> *CORTEX-12: Stable Neuro-Symbolic Representations with Real-Image Invariance* (Phase-2)
+
+---
+
+## Contact
+
+Project maintained by the original author.  
+Contributions and discussions are welcome via pull requests or issues.
+
