@@ -160,7 +160,7 @@ If you reference this model, please cite as:
 
 # 2️⃣ MODEL_CARD.md — Evaluation Section (Conference Style)
 
-```md
+
 ## Evaluation
 
 ### Key Claim (One-Sentence Summary)
@@ -235,7 +235,7 @@ invariance**, rather than training duration alone.
 
 All results can be reproduced using:
 
-```bash
+
 python demo_cortex12_showcase.py --seed 0 --n 256
 
 
