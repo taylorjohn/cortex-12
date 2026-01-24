@@ -457,6 +457,17 @@ python demo_cortex12_showcase.py `
   --n 256 `
   --seed 0
 ---
+## Figures
+
+### Real-Image Invariance (Tiny-ImageNet)
+![CORTEX-12 Real-Image Invariance](figs/real_invariance_plot.png)
+
+### Symbolic Stability (Compare-Stability)
+![CORTEX-12 Symbolic Stability](figs/symbolic_stability_plot.png)
+
+
+
+---
 ## Diagrams testing
 
 ![Two-world training diagram](docs/diagrams/training_two_worlds.svg)
