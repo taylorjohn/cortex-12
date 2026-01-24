@@ -401,10 +401,23 @@ At this mid-Phase-2 checkpoint, the model demonstrates:
 
 This checkpoint serves as a **baseline reference** for later Phase-2 checkpoints (e.g. ~8k, ~10k, ~12k), where further attribute disentanglement—particularly color—is expected.
 
+---
 
+### Tiny-ImageNet doesn’t rewrite the concept manifold — it makes real-image embeddings invariant.
 
+“On a real-image invariance benchmark (two augmented views of the same Tiny-ImageNet image), the with-real model achieves 0.835 ± 0.127 cosine similarity vs 0.686 ± 0.215 for the no-real ablation at 1k steps, demonstrating substantially improved real-world invariance without degrading symbolic stability.”
 
+### Real-image invariance (same step count: 1,000)
 
+### No-real (λ_real=0)
+
+- mean = 0.6855
+- std = 0.2152
+
+### With-real (Tiny-ImageNet NT-Xent)
+
+- mean = 0.8353
+- std = 0.1266
 
 
 ---
