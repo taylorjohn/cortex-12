@@ -456,6 +456,8 @@ python demo_cortex12_showcase.py `
   --noreal_4k runs\eval_snapshots\cortex_noreal_4k_final.pt `
   --n 256 `
   --seed 0
+```
+
 ---
 ## Figures
 
