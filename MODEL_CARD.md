@@ -156,6 +156,90 @@ If you reference this model, please cite as:
 > *CORTEX-12: Stable Neuro-Symbolic Representations with Real-Image Invariance* (Phase-2)
 
 ---
+---
+
+# 2️⃣ MODEL_CARD.md — Evaluation Section (Conference Style)
+
+```md
+## Evaluation
+
+### Key Claim (One-Sentence Summary)
+
+> **CORTEX-12 preserves symbolic concept geometry while acquiring strong
+> real-image invariance; this invariance arises from real-image exposure rather
+> than increased synthetic-only training.**
+
+---
+
+### Experimental Setup
+
+We evaluate CORTEX-12 using three complementary probes:
+
+1. **Symbolic Stability Test**  
+   Measures cosine similarity for SAME vs DIFF symbolic concepts to ensure
+   concept geometry remains stable.
+
+2. **Real-Image Invariance Test**  
+   Measures cosine similarity between embeddings of two augmented views of the
+   same Tiny-ImageNet image.
+
+3. **Ablation Study**  
+   Compares:
+   - synthetic-only training (1k and 4k steps)
+   - training with real images (1k steps)
+   - the final mixed-training model
+
+All results are averaged over *n = 256* samples with a fixed seed.
+
+---
+
+### Quantitative Results
+
+| Model Variant      | SAME (↑)        | DIFF (↓)        | Real Invariance (↑) |
+|--------------------|-----------------|-----------------|---------------------|
+| Final (with-real)  | 0.9880 ± 0.0026 | 0.5734 ± 0.0117 | **0.8549 ± 0.1246** |
+| With-real @1k      | 0.9880 ± 0.0027 | 0.5766 ± 0.0117 | 0.8201 ± 0.1388     |
+| No-real @1k        | 0.9882 ± 0.0017 | 0.5729 ± 0.0140 | 0.6899 ± 0.1979     |
+| No-real @4k        | 0.9879 ± 0.0028 | 0.5769 ± 0.0107 | 0.7177 ± 0.2062     |
+
+---
+
+### Interpretation
+
+Symbolic SAME/DIFF scores remain statistically unchanged across all training
+conditions, indicating that real-image exposure does not distort the learned
+concept geometry.
+
+In contrast, real-image invariance improves substantially with real-image
+training (+0.16 absolute gain from No-real@1k to Final). Increasing synthetic-only
+training from 1k to 4k steps yields only a marginal improvement and fails to
+close the gap.
+
+These results indicate that **real-image exposure is the primary driver of
+invariance**, rather than training duration alone.
+
+---
+
+### Failure Modes and Limitations
+
+- Synthetic-only training exhibits high variance in real-image invariance,
+  indicating unstable generalization.
+- Longer synthetic-only training partially improves invariance but plateaus
+  well below real-image–trained models.
+- Current evaluation focuses on low-resolution natural images (Tiny-ImageNet);
+  higher-resolution or domain-shifted datasets remain future work.
+
+---
+
+### Reproducibility
+
+All results can be reproduced using:
+
+```bash
+python demo_cortex12_showcase.py --seed 0 --n 256
+
+
+---
 
 ## Contact
 
