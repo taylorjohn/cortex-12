@@ -428,6 +428,16 @@ This checkpoint serves as a **baseline reference** for later Phase-2 checkpoints
 | Compare-Stability DIFF (mean ± std) | 0.5712 ± 0.0131 | 0.5727 ± 0.0101 | 0.5706 ± 0.0082 |
 | Real-Image Invariance REAL-INVAR (mean ± std) | 0.6855 ± 0.2152 | 0.8353 ± 0.1266 | 0.8608 ± 0.1158 |
 
+### Demo Results (n=256, seed=0)
+
+| Variant | SAME (mean±std) | DIFF (mean±std) | REAL-INVAR (mean±std) |
+|---|---:|---:|---:|
+| Final (with-real @12k) | 0.9875 ± 0.0025 | 0.5739 ± 0.0109 | 0.8549 ± 0.1246 |
+| With-real @1k | 0.9881 ± 0.0019 | 0.5739 ± 0.0111 | 0.8201 ± 0.1388 |
+| No-real @1k | 0.9882 ± 0.0027 | 0.5708 ± 0.0098 | 0.6899 ± 0.1979 |
+| No-real @4k (final) | 0.9883 ± 0.0029 | 0.5759 ± 0.0124 | 0.7177 ± 0.2062 |
+
+
 ---
 ## Diagrams testing
 
