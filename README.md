@@ -437,7 +437,25 @@ This checkpoint serves as a **baseline reference** for later Phase-2 checkpoints
 | No-real @1k | 0.9882 ± 0.0027 | 0.5708 ± 0.0098 | 0.6899 ± 0.1979 |
 | No-real @4k (final) | 0.9883 ± 0.0029 | 0.5759 ± 0.0124 | 0.7177 ± 0.2062 |
 
+---
 
+## Quick Demo: Stability, Invariance, and Ablation (CORTEX-12)
+
+This demo reproduces the core claims of **CORTEX-12** in a single command:
+symbolic stability, real-image invariance, and a controlled ablation showing
+that real images — not just longer training — drive invariance.
+
+### Run the Demo
+
+```powershell
+python demo_cortex12_showcase.py `
+  --tiny_root .\datasets\tiny-imagenet-200 `
+  --final_ckpt runs\eval_snapshots\cortex_final.pt `
+  --withreal_1k runs\eval_snapshots\cortex_withreal_step01000.pt `
+  --noreal_1k runs\eval_snapshots\cortex_noreal_step01000.pt `
+  --noreal_4k runs\eval_snapshots\cortex_noreal_4k_final.pt `
+  --n 256 `
+  --seed 0
 ---
 ## Diagrams testing
 
