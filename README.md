@@ -418,7 +418,15 @@ This checkpoint serves as a **baseline reference** for later Phase-2 checkpoints
 
 - mean = 0.8353
 - std = 0.1266
+  
+---
+### Results Summary (Phase-2)
 
+| Metric | No-real @1k | With-real @1k | With-real Final |
+|---|---:|---:|---:|
+| Compare-Stability SAME (mean ± std) | 0.9884 ± 0.0021 | 0.9886 ± 0.0022 | 0.9880 ± 0.0027 |
+| Compare-Stability DIFF (mean ± std) | 0.5712 ± 0.0131 | 0.5727 ± 0.0101 | 0.5706 ± 0.0082 |
+| Real-Image Invariance REAL-INVAR (mean ± std) | 0.6855 ± 0.2152 | 0.8353 ± 0.1266 | 0.8608 ± 0.1158 |
 
 ---
 ## Diagrams testing
