@@ -1,10 +1,10 @@
 # CORTEX-12
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Compute: CPU Only](https://img.shields.io/badge/Compute-CPU--Only-blue.svg)]
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)]
+<a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License"></a>
+<a href="#prerequisites"><img src="https://img.shields.io/badge/Compute-CPU--Only-blue.svg" alt="CPU Only"></a>
+<a href="#prerequisites"><img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg" alt="Python 3.10+"></a>
 
 <p align="center">
-  <img src="Cortex-12_logo.png" alt="Cortex-12 Logo" width="800"/>
+  <img src="Cortex-12_logo.png" alt="CORTEX-12 Logo - A compact visual cortex for grounded, neuro-symbolic reasoning" width="800"/>
 </p>
 
 ## A Compact Visual Cortex for Grounded, Neuro-Symbolic Reasoning
@@ -47,11 +47,12 @@ Unlike large models, CORTEX-12 is **simple, inspectable, and deterministic**.
 
 ## Core Capabilities
 
-- RGB images → compact vector embeddings  
-- Explicit semantic attributes (color/shape/size)  
-- Stable similarity comparisons across checkpoints  
-- Compositional imagination via structured rendering  
-- CPU-only execution (AMD-friendly)
+- **Visual Embeddings**: RGB images → compact 128-dimensional latent vectors
+- **Semantic Attributes**: Explicit semantic axes (color, shape, size)
+- **Stable Similarity**: Stable similarity-based reasoning across checkpoints
+- **External Memory**: Inspectable concept memory (not implicit weights)
+- **Compositional Imagination**: Structured rendering for compositional reasoning
+- **CPU-Only Execution**: AMD-friendly, CPU-only operation
 
 ---
 
@@ -69,6 +70,11 @@ standalone task solver.
 ---
 
 ## Quick Start
+
+### Prerequisites
+- **Operating System**: Windows 11 (Linux/macOS may work but are untested)
+- **Python**: 3.10 or higher (3.11 supported)
+- **Hardware**: AMD Ryzen-class CPU recommended (CPU-only, no GPU required)
 
 ### Setup (Windows PowerShell)
 
@@ -96,18 +102,21 @@ pip install -r requirements.txt
 
 ---
 
-## Core Capabilities
-
-- RGB → compact 128-D latent vectors
-- Explicit semantic axes (color, shape, size)
-- Stable similarity-based reasoning
-- External, inspectable concept memory
-- Compositional imagination via rendering
-- CPU-only operation (AMD-friendly)
-
----
-
 ## Repository Structure
+
+```
+📁 cortex-12/
+├── 📁 docs/              # Architecture, roadmap, and technical documentation
+├── 📁 examples/          # Example scripts and demonstrations
+├── 📁 tools/             # Utilities for certification and validation
+├── 📁 figs/              # Figures and visualizations
+├── 📄 vl_jepa_llm_v12.py # CORTEX-12 main runtime
+├── 📄 train_cortex_*.py  # Training scripts for Phase 1 & 2
+├── 📄 test_v12_*.py      # Test suite
+├── 📄 README.md          # Project overview and setup
+├── 📄 LICENSE            # MIT License
+└── 📄 requirements.txt   # Python dependencies
+```
 
 ### Core Runtime
 - `vl_jepa_llm_v12.py` — CORTEX-12 runtime (visual cortex + memory)
@@ -126,15 +135,6 @@ pip install -r requirements.txt
 - `test_v12_compare_stability.py`
 - `bench_v12_forward.py`
 - `amd_batch_stress_test.py`
-
----
-
-## Requirements
-
-- Windows 11
-- Python 3.10+ (3.11 supported)
-- CPU-only PyTorch
-- AMD Ryzen-class CPU recommended
 
 ---
 
@@ -468,6 +468,19 @@ python demo_cortex12_showcase.py `
 ![CORTEX-12 Symbolic Stability](figs/symbolic_stability_plot.png)
 
 
+
+---
+
+## Contact & Support
+
+For questions, issues, or contributions:
+
+- **Issues**: Report bugs or request features via [GitHub Issues](../../issues)
+- **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
+- **Vision & Roadmap**: Review [VISION.md](VISION.md) and [docs/ROADMAP.md](docs/ROADMAP.md)
+- **Model Details**: Refer to [MODEL_CARD.md](MODEL_CARD.md) for technical specifications
+
+For research collaborations or academic inquiries, see [AUTHORS.md](AUTHORS.md).
 
 ---
 ## Diagrams testing
