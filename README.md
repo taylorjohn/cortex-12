@@ -1,5 +1,5 @@
 # CORTEX-12
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+<a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License"></a>
 <a href="#prerequisites"><img src="https://img.shields.io/badge/Compute-CPU--Only-blue.svg" alt="CPU Only"></a>
 <a href="#prerequisites"><img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg" alt="Python 3.10+"></a>
 
