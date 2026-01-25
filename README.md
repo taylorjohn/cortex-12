@@ -1,7 +1,7 @@
 # CORTEX-12
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-<a href="#requirements"><img src="https://img.shields.io/badge/Compute-CPU--Only-blue.svg" alt="CPU Only"></a>
-<a href="#requirements"><img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg" alt="Python 3.10+"></a>
+<a href="#prerequisites"><img src="https://img.shields.io/badge/Compute-CPU--Only-blue.svg" alt="CPU Only"></a>
+<a href="#prerequisites"><img src="https://img.shields.io/badge/Python-3.10%2B-blue.svg" alt="Python 3.10+"></a>
 
 <p align="center">
   <img src="Cortex-12_logo.png" alt="CORTEX-12 Logo - A compact visual cortex for grounded, neuro-symbolic reasoning" width="800"/>
@@ -135,15 +135,6 @@ pip install -r requirements.txt
 - `test_v12_compare_stability.py`
 - `bench_v12_forward.py`
 - `amd_batch_stress_test.py`
-
----
-
-## Requirements
-
-- Windows 11
-- Python 3.10+ (3.11 supported)
-- CPU-only PyTorch
-- AMD Ryzen-class CPU recommended
 
 ---
 
@@ -484,7 +475,7 @@ python demo_cortex12_showcase.py `
 
 For questions, issues, or contributions:
 
-- **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/taylorjohn/cortex-12/issues)
+- **Issues**: Report bugs or request features via [GitHub Issues](../../issues)
 - **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 - **Vision & Roadmap**: Review [VISION.md](VISION.md) and [docs/ROADMAP.md](docs/ROADMAP.md)
 - **Model Details**: Refer to [MODEL_CARD.md](MODEL_CARD.md) for technical specifications
