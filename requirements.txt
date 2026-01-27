@@ -1,23 +1,24 @@
 # Core
-python>=3.10
+numpy>=1.23
+scipy
+tqdm
+pyyaml
+einops
 
-# PyTorch (CPU-only recommended)
+# Image + data
+pillow
+opencv-python
+scikit-image
+
+# ML
 torch>=2.1
 torchvision
 torchaudio
 
-# Numeric / ML
-numpy
-scipy
-scikit-learn
-
-# Image & visualization
-Pillow
+# Logging / analysis
 matplotlib
+tensorboard
 
 # Utilities
-tqdm
-einops
-
-# Optional (safe, lightweight)
-requests
+rich
+psutil

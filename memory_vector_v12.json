@@ -1,0 +1,52 @@
+{
+  "concepts": {
+    "red_circle_small_0deg_matte_0_25_0_25": {
+      "color": "red",
+      "shape": "circle",
+      "size": "small",
+      "orientation": 0,
+      "material": "matte",
+      "location": [0.25, 0.25]
+    },
+    "blue_square_medium_90deg_glossy_0_75_0_25": {
+      "color": "blue",
+      "shape": "square",
+      "size": "medium",
+      "orientation": 90,
+      "material": "glossy",
+      "location": [0.75, 0.25]
+    },
+    "green_triangle_large_180deg_metallic_0_50_0_50": {
+      "color": "green",
+      "shape": "triangle",
+      "size": "large",
+      "orientation": 180,
+      "material": "metallic",
+      "location": [0.5, 0.5]
+    },
+    "yellow_rectangle_small_270deg_fabric_0_25_0_75": {
+      "color": "yellow",
+      "shape": "rectangle",
+      "size": "small",
+      "orientation": 270,
+      "material": "fabric",
+      "location": [0.25, 0.75]
+    },
+    "purple_star_medium_0deg_glass_0_75_0_75": {
+      "color": "purple",
+      "shape": "star",
+      "size": "medium",
+      "orientation": 0,
+      "material": "glass",
+      "location": [0.75, 0.75]
+    },
+    "orange_hexagon_large_90deg_matte_0_50_0_25": {
+      "color": "orange",
+      "shape": "hexagon",
+      "size": "large",
+      "orientation": 90,
+      "material": "matte",
+      "location": [0.5, 0.25]
+    }
+  }
+}
