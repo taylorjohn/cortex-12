@@ -468,7 +468,45 @@ python demo_cortex12_showcase.py `
 ![CORTEX-12 Symbolic Stability](figs/symbolic_stability_plot.png)
 
 
+## 🧠 Phase-3: Curriculum-Based Semantic Grounding (NEW)
 
+CORTEX-12 now supports **structured curriculum learning** over synthetic visual scenes with explicit control over six grounded attributes:
+
+- **Color** (12 classes: red, blue, amber, chartreuse, etc.)  
+- **Shape** (6 classes: square, circle, hexagon, triangle, etc.)  
+- **Size** (3 classes: small, medium, large)  
+- **Material** (5 classes: matte, glossy, metallic, glass, plastic)  
+- **Orientation** (4 classes: 0°, 90°, 180°, 270°)  
+- **Location** (continuous x,y coordinates)
+
+### 🔑 Key Innovations
+- **Contrastive axis loss**: Each semantic attribute is trained in a dedicated subspace of the 128-D embedding
+- **Verifiable perception**: Runtime certification validates that "dimension 64–79 = color"
+- **CPU-only training**: Full pipeline runs on consumer CPUs (tested on AMD Ryzen)
+- **Deterministic & inspectable**: No randomness; all weights and memory are human-readable
+
+### 📊 Performance (After 50 Epochs)
+| Attribute | Confidence |
+|----------|------------|
+| Material | 0.75–0.78 |
+| Size     | 0.64–0.70 |
+| Color    | 0.48–0.52 |
+| Shape    | 0.44–0.48 |
+| Orientation | 0.35–0.55 |
+
+> ✅ **All axes are simultaneously recognized** in a single forward pass  
+> ✅ **Confidence calibrated via exponential distance-to-centroid**
+
+### 🛠️ Usage
+```powershell
+# Train
+python train_cortex_phase3_curriculum.py --epochs 150 --batch_size 4
+
+# Certify
+python tools/certify_cortex12_phase3.py --checkpoint runs/phase3/cortex_step_phase3_0150.pt --output_dir certs/phase3
+
+# Verify
+python examples/verify_perception_phase3.py --image data/curriculum/images/red_square_medium_0deg_matte_0_25_0_25.png --checkpoint runs/phase3/cortex_step_phase3_0150.pt --cert_dir certs/phase3
 ---
 
 ## Contact & Support
