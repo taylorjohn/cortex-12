@@ -507,6 +507,19 @@ python tools/certify_cortex12_phase3.py --checkpoint runs/phase3/cortex_step_pha
 
 # Verify
 python examples/verify_perception_phase3.py --image data/curriculum/images/red_square_medium_0deg_matte_0_25_0_25.png --checkpoint runs/phase3/cortex_step_phase3_0150.pt --cert_dir certs/phase3
+```
+
+### 🎯 Why It Matters
+Phase 3 transforms CORTEX-12 from a representation learner into a verifiable perceptual instrument—proving that small, structured models can achieve auditable, explainable perception without GPUs, black-box probing, or massive scale.
+
+### 📁 New Files Added
+```
+train_cortex_phase3_curriculum.py — Curriculum trainer with contrastive axis loss
+tools/certify_cortex12_phase3.py — Axis-specific certification
+examples/verify_perception_phase3.py — Real-time perception verification
+data/curriculum/ — Synthetic dataset with 6 controlled attributes
+cortex_adapter_v12.py — Updated adapter with 6 projection heads
+```
 ---
 
 ## Contact & Support
