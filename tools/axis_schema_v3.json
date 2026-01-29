@@ -1,0 +1,10 @@
+{
+  "axes": {
+    "shape": { "dims": [0, 31], "tolerance": 3.0 },
+    "size": { "dims": [32, 47], "tolerance": 3.0 },
+    "material": { "dims": [48, 63], "tolerance": 3.0 },
+    "color": { "dims": [64, 79], "tolerance": 3.0 },
+    "location": { "dims": [80, 87], "tolerance": 3.0 },
+    "orientation": { "dims": [88, 103], "tolerance": 3.0 }
+  }
+}
