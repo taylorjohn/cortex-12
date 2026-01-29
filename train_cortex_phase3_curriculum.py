@@ -38,7 +38,11 @@ class CurriculumDataset(Dataset):
     def __init__(self, data_dir, transform=None):
         self.data_dir = data_dir
         self.transform = transform
-        with open(os.path.join(data_dir, "labels.json"), 'r') as f:
+        # Use the merged labels file
+        labels_path = os.path.join(data_dir, "labels_merged.json")
+        if not os.path.exists(labels_path):
+            labels_path = os.path.join(data_dir, "labels.json")  # Fallback
+        with open(labels_path, 'r') as f:
             self.labels = json.load(f)
         self.filenames = list(self.labels.keys())
 
@@ -126,7 +130,7 @@ def main():
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
-    dataset = CurriculumDataset(args.data_dir, transform=transform)
+    dataset = CurriculumDataset("data/balanced_images", transform=transform)
     dataloader = DataLoader(
         dataset, 
         batch_size=args.batch_size, 
@@ -161,12 +165,12 @@ def main():
     )
 
     LOSS_WEIGHTS = {
-        "shape": 1.8,    # ↑ Enhanced for better disentanglement
+        "shape": 1.0,
         "size": 0.8,
-        "material": 0.7,
-        "color": 1.8,    # ↑ Enhanced for better disentanglement
-        "orientation": 1.2,  # ↑ Also boosted
-        "location": 0.0  # skipped
+        "material": 1.0,
+        "color": 1.0,
+        "orientation": 0.8,  # Increased from 0.6
+        "location": 0.0
     }
 
     model.train()
