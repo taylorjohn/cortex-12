@@ -2,6 +2,7 @@ venv/
 __pycache__/
 datasets/
 runs/
+data/balanced_images/
 # Certification artifacts (user-generated)
 cert_data/
 certificates/
