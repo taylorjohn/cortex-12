@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CORTEX-14 Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0a0c0f;
+  --bg2: #111418;
+  --bg3: #161b22;
+  --border: #2a3240;
+  --text: #c9d1d9;
+  --text-dim: #636c76;
+  --accent: #58a6ff;
+  --accent2: #7ee787;
+  --accent3: #d29922;
+  --accent4: #f78166;
+  --novel: #bc8cff;
+  --novel-glow: rgba(188,140,255,0.15);
+  --std: #58a6ff;
+  --std-glow: rgba(88,166,255,0.1);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align:center;
+  padding:48px 20px 24px;
+  position:relative;
+}
+.header::after {
+  content:'';
+  position:absolute;
+  bottom:0; left:50%; transform:translateX(-50%);
+  width:200px; height:1px;
+  background:linear-gradient(90deg,transparent,var(--border),transparent);
+}
+.header h1 {
+  font-size:clamp(1.6rem,4vw,2.4rem);
+  font-weight:700;
+  letter-spacing:-.02em;
+  color:#fff;
+}
+.header h1 span { color:var(--novel); }
+.header p {
+  color:var(--text-dim);
+  font-size:.88rem;
+  margin-top:8px;
+  font-weight:300;
+  max-width:560px;
+  margin-left:auto; margin-right:auto;
+  line-height:1.5;
+}
+
+/* ── LEGEND ── */
+.legend {
+  display:flex; justify-content:center; gap:24px;
+  flex-wrap:wrap;
+  padding:20px 20px 32px;
+}
+.legend-item {
+  display:flex; align-items:center; gap:7px;
+  font-size:.78rem; font-family:'IBM Plex Mono',monospace;
+  color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em;
+}
+.legend-dot {
+  width:10px; height:10px; border-radius:3px;
+}
+.legend-dot.std { background:var(--std); box-shadow:0 0 6px var(--std-glow); }
+.legend-dot.novel { background:var(--novel); box-shadow:0 0 6px var(--novel-glow); }
+.legend-dot.data { background:var(--accent3); box-shadow:0 0 6px rgba(210,153,34,.15); }
+
+/* ── MAIN LAYOUT ── */
+.container { max-width:960px; margin:0 auto; padding:0 18px 60px; }
+
+/* ── FLOW ARROW ── */
+.flow-arrow {
+  text-align:center;
+  color:var(--border);
+  font-size:1.4rem;
+  padding:4px 0;
+  line-height:1;
+}
+
+/* ── LAYER SECTION ── */
+.layer {
+  margin-bottom:6px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--bg2);
+  overflow:hidden;
+  transition:border-color .25s;
+}
+.layer:hover { border-color:#3a4756; }
+
+/* layer header (always visible) */
+.layer-header {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 18px;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.layer-header .layer-icon {
+  width:34px; height:34px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem; flex-shrink:0;
+}
+.layer-header .layer-title { flex:1; }
+.layer-header .layer-title h3 {
+  font-size:.92rem; font-weight:600; color:#fff;
+  letter-spacing:-.01em;
+}
+.layer-header .layer-title .layer-sub {
+  font-size:.74rem; color:var(--text-dim);
+  font-family:'IBM Plex Mono',monospace;
+  margin-top:1px;
+}
+.layer-header .layer-tag {
+  font-size:.68rem; font-family:'IBM Plex Mono',monospace;
+  text-transform:uppercase; letter-spacing:.1em;
+  padding:3px 8px; border-radius:4px; font-weight:500;
+}
+.layer-header .caret {
+  width:18px; color:var(--text-dim);
+  transition:transform .25s;
+  font-size:.85rem; flex-shrink:0;
+}
+.layer.open .layer-header .caret { transform:rotate(90deg); }
+
+/* layer body (collapsible) */
+.layer-body {
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .4s cubic-bezier(.4,0,.2,1);
+}
+.layer.open .layer-body { max-height:2000px; }
+.layer-body-inner {
+  padding:0 18px 16px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(240px,1fr));
+  gap:10px;
+}
+
+/* ── COMPONENT CARD ── */
+.comp {
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:14px 14px 12px;
+  transition:border-color .2s, transform .15s;
+  cursor:default;
+}
+.comp:hover { border-color:#3a4756; transform:translateY(-1px); }
+.comp.novel-comp {
+  border-color:rgba(188,140,255,.25);
+  background:linear-gradient(135deg, var(--bg3) 60%, rgba(188,140,255,.06));
+}
+.comp.novel-comp:hover { border-color:rgba(188,140,255,.5); }
+
+.comp-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.comp-dot {
+  width:8px; height:8px; border-radius:50%; flex-shrink:0;
+}
+.comp-name {
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.78rem; font-weight:500; color:#fff;
+}
+.comp-name .dim { color:var(--text-dim); font-weight:300; }
+.comp-desc {
+  font-size:.76rem; color:var(--text-dim);
+  line-height:1.45;
+  padding-left:16px;
+}
+.comp-tag {
+  display:inline-block;
+  font-size:.62rem; font-family:'IBM Plex Mono',monospace;
+  text-transform:uppercase; letter-spacing:.06em;
+  padding:2px 6px; border-radius:3px; margin-top:6px;
+  margin-left:16px;
+}
+
+/* ── AXIS MAP ── */
+.axis-section {
+  margin-top:12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--bg2);
+  overflow:hidden;
+}
+.axis-header {
+  padding:14px 18px;
+  display:flex; align-items:center; gap:12px;
+  cursor:pointer;
+  user-select:none;
+}
+.axis-header h3 { font-size:.92rem; font-weight:600; color:#fff; flex:1; }
+.axis-header .caret { color:var(--text-dim); font-size:.85rem; transition:transform .25s; }
+.axis-section.open .axis-header .caret { transform:rotate(90deg); }
+.axis-body {
+  max-height:0; overflow:hidden;
+  transition:max-height .4s cubic-bezier(.4,0,.2,1);
+}
+.axis-section.open .axis-body { max-height:600px; }
+.axis-inner { padding:0 18px 18px; }
+
+/* axis bar */
+.axis-bar-wrap { position:relative; height:42px; margin-bottom:6px; }
+.axis-bar {
+  display:flex; height:36px; border-radius:6px; overflow:hidden;
+  border:1px solid var(--border);
+}
+.axis-seg {
+  height:100%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.68rem; font-weight:500;
+  color:rgba(255,255,255,.85);
+  white-space:nowrap;
+  transition:filter .2s;
+  position:relative;
+}
+.axis-seg:hover { filter:brightness(1.25); }
+.axis-seg.shape   { background:#1d3a5c; flex:32; }
+.axis-seg.size    { background:linear-gradient(135deg,#3d2056,#5a2d82); flex:16; border-left:1px solid rgba(188,140,255,.3); border-right:1px solid rgba(188,140,255,.3); }
+.axis-seg.material{ background:#1a3029; flex:16; }
+.axis-seg.color   { background:#2e3a1a; flex:16; }
+.axis-seg.location{ background:#3a2a1a; flex:8; }
+.axis-seg.orient  { background:#1a2a3a; flex:16; }
+.axis-seg.reserved{ background:#1f1f1f; flex:24; opacity:.6; }
+
+/* axis legend row */
+.axis-legend { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+.axis-leg-item {
+  display:flex; align-items:center; gap:6px;
+  font-size:.73rem; color:var(--text-dim);
+}
+.axis-leg-swatch {
+  width:14px; height:14px; border-radius:3px;
+}
+.axis-leg-item .dims {
+  font-family:'IBM Plex Mono',monospace; font-size:.7rem; color:var(--text-dim);
+}
+
+/* ── FLOW CONNECTOR (visual pipe between layers) ── */
+.connector {
+  display:flex; align-items:center; justify-content:center;
+  gap:6px; padding:8px 0;
+  color:var(--text-dim);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem;
+}
+.connector .pipe {
+  width:2px; height:18px;
+  background:linear-gradient(180deg, var(--border), transparent);
+}
+.connector .label {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:3px 10px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+/* ── NOVEL HIGHLIGHT BANNER ── */
+.novel-banner {
+  border-radius:10px;
+  border:1px solid rgba(188,140,255,.3);
+  background:linear-gradient(135deg, rgba(188,140,255,.08), rgba(188,140,255,.02));
+  padding:14px 18px;
+  margin-top:6px;
+  display:flex; gap:14px; align-items:flex-start;
+  flex-wrap:wrap;
+}
+.novel-banner .nb-icon {
+  font-size:1.3rem; flex-shrink:0; margin-top:2px;
+}
+.novel-banner .nb-body { flex:1; min-width:200px; }
+.novel-banner .nb-body h4 {
+  font-size:.85rem; color:var(--novel); font-weight:600; margin-bottom:4px;
+}
+.novel-banner .nb-body p {
+  font-size:.76rem; color:var(--text-dim); line-height:1.5;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:520px){
+  .layer-body-inner { grid-template-columns:1fr; }
+  .legend { gap:12px; }
+  .axis-seg { font-size:.6rem; }
+  .axis-seg.location { font-size:0; }
+  .axis-seg.reserved { font-size:0; }
+}
+
+/* ── STAGGERED ENTRANCE ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.layer, .novel-banner, .axis-section {
+  animation: fadeUp .45s cubic-bezier(.4,0,.2,1) both;
+}
+.layer:nth-child(1) { animation-delay:.05s; }
+.layer:nth-child(2) { animation-delay:.1s; }
+.layer:nth-child(3) { animation-delay:.15s; }
+.layer:nth-child(4) { animation-delay:.2s; }
+.layer:nth-child(5) { animation-delay:.25s; }
+.layer:nth-child(6) { animation-delay:.3s; }
+.layer:nth-child(7) { animation-delay:.35s; }
+.novel-banner { animation-delay:.4s; }
+.axis-section { animation-delay:.45s; }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>CORTEX-<span>14</span> &nbsp; Architecture Map</h1>
+  <p>Every component that makes the system work — the industry-standard foundations (blue) your novel innovations (purple) are built on top of.</p>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot std"></div>Industry Standard</div>
+  <div class="legend-item"><div class="legend-dot novel"></div>Novel / Custom</div>
+  <div class="legend-item"><div class="legend-dot data"></div>Data Pipeline</div>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- LAYER 0 — RAW INPUT                            -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="layer open" onclick="this.classList.toggle('open')">
+  <div class="layer-header">
+    <div class="layer-icon" style="background:#1a2533;"><span>🖼️</span></div>
+    <div class="layer-title">
+      <h3>Raw Input</h3>
+      <div class="layer-sub">224×224 RGB image</div>
+    </div>
+    <span class="layer-tag" style="background:#1a2533;color:var(--accent3);">Input</span>
+    <span class="caret">▶</span>
+  </div>
+  <div class="layer-body">
+    <div class="layer-body-inner">
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--accent3)"></div><div class="comp-name">Synthetic Shape Images</div></div>
+        <div class="comp-desc">PIL / ImageDraw generates labelled shapes — 6 shapes × 12 colors × 5 sizes = 54,000 training images.</div>
+        <span class="comp-tag" style="background:rgba(210,153,34,.12);color:var(--accent3);">PIL · ImageDraw</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">torchvision.transforms</div></div>
+        <div class="comp-desc">Resize → ToTensor → ImageNet Normalize. The exact preprocessing DINOv2 was pretrained on. Non-negotiable.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="connector"><div class="pipe"></div><div class="label">384-D features</div><div class="pipe"></div></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- LAYER 1 — DINOV2 BACKBONE                      -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="layer open" onclick="this.classList.toggle('open')">
+  <div class="layer-header">
+    <div class="layer-icon" style="background:#162a1e;"><span>🧠</span></div>
+    <div class="layer-title">
+      <h3>Vision Backbone</h3>
+      <div class="layer-sub">Pretrained feature extractor — FROZEN</div>
+    </div>
+    <span class="layer-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+    <span class="caret">▶</span>
+  </div>
+  <div class="layer-body">
+    <div class="layer-body-inner">
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">DINOv2 <span class="dim">dinov2_vits14</span></div></div>
+        <div class="comp-desc">Facebook's self-supervised Vision Transformer. Outputs a 384-D CLS token — a rich, general-purpose visual feature vector. Completely frozen; zero gradients flow through it.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">ViT · Self-Supervised</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">torch.hub.load</div></div>
+        <div class="comp-desc">Pulls the pretrained DINOv2 weights from the Facebook model hub. No training involved — just load and run.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="connector"><div class="pipe"></div><div class="label">384-D → 128-D projection</div><div class="pipe"></div></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- LAYER 2 — PROJECTION & EMBEDDING               -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="layer open" onclick="this.classList.toggle('open')">
+  <div class="layer-header">
+    <div class="layer-icon" style="background:#2a1f3d;"><span>📐</span></div>
+    <div class="layer-title">
+      <h3>Structured Embedding</h3>
+      <div class="layer-sub">CortexAdapter → 128-D semantic vector</div>
+    </div>
+    <span class="layer-tag" style="background:var(--novel-glow);color:var(--novel);">Novel + Standard</span>
+    <span class="caret">▶</span>
+  </div>
+  <div class="layer-body">
+    <div class="layer-body-inner">
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">nn.Linear <span class="dim">projections</span></div></div>
+        <div class="comp-desc">Each semantic axis gets its own linear layer: shape_proj(384→32), color_proj(384→16), size_proj(384→16), etc. These are the only layers that actually learn during contrastive training.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp novel-comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--novel)"></div><div class="comp-name">CortexAdapterV13</div></div>
+        <div class="comp-desc">Orchestrates all projections into a single 128-D vector with a fixed axis layout. Shape at dims 0–31, Size at 32–47, Color at 64–79, etc. The architecture that makes disentangled axes possible.</div>
+        <span class="comp-tag" style="background:var(--novel-glow);color:var(--novel);">Novel</span>
+      </div>
+      <div class="comp novel-comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--novel)"></div><div class="comp-name">OrdinalSizeHead</div></div>
+        <div class="comp-desc">Replaces the simple size_proj for the Size axis. Uses 4 threshold heads (each nn.Linear → Sigmoid) to learn "is this ≥ small?", "≥ medium?", etc. Encodes the ordering tiny&lt;small&lt;medium&lt;large&lt;huge.</div>
+        <span class="comp-tag" style="background:var(--novel-glow);color:var(--novel);">Novel</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">nn.ModuleList <span class="dim">+ nn.Sequential</span></div></div>
+        <div class="comp-desc">ModuleList holds the 4 threshold heads. Sequential builds the feature_extractor MLP (Linear→ReLU→Dropout→Linear→ReLU). Both are standard PyTorch containers.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">ReLU · Sigmoid · Dropout</div></div>
+        <div class="comp-desc">ReLU activates the MLPs. Sigmoid converts threshold logits to probabilities (and caps the continuous regressor to [0,1]). Dropout at 0.1 regularizes and enables MC sampling later.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="connector"><div class="pipe"></div><div class="label">128-D embedding</div><div class="pipe"></div></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- LAYER 3 — TRAINING LOSSES                      -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="layer" onclick="this.classList.toggle('open')">
+  <div class="layer-header">
+    <div class="layer-icon" style="background:#2a2416;"><span>📊</span></div>
+    <div class="layer-title">
+      <h3>Training Losses</h3>
+      <div class="layer-sub">What the model optimises during v13 training</div>
+    </div>
+    <span class="layer-tag" style="background:var(--novel-glow);color:var(--novel);">Novel + Standard</span>
+    <span class="caret">▶</span>
+  </div>
+  <div class="layer-body">
+    <div class="layer-body-inner">
+      <div class="comp novel-comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--novel)"></div><div class="comp-name">SIGReg Loss</div></div>
+        <div class="comp-desc">Covariance regularization: forces the embedding's covariance matrix toward identity. Diagonal → unit variance per dim. Off-diagonal → zero cross-correlation. Mathematically prevents any axis from collapsing to a constant.</div>
+        <span class="comp-tag" style="background:var(--novel-glow);color:var(--novel);">Novel</span>
+      </div>
+      <div class="comp novel-comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--novel)"></div><div class="comp-name">Ordinal Size Loss</div></div>
+        <div class="comp-desc">Binary cross-entropy on each of the 4 threshold heads. "Is this image ≥ small?" etc. Learns the size ordering as a chain of binary decisions rather than treating 5 classes as independent.</div>
+        <span class="comp-tag" style="background:var(--novel-glow);color:var(--novel);">Novel</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">Binary Cross-Entropy</div></div>
+        <div class="comp-desc">The actual loss function under each threshold head. Standard BCE — the novel part is the ordinal structure on top of it, not the BCE itself.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">AdamW Optimizer</div></div>
+        <div class="comp-desc">Weight-decay-regularized adaptive optimizer. Drives gradient updates on all trainable parameters (the projection layers and ordinal heads). Industry-default choice.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="connector"><div class="pipe"></div><div class="label">certified 128-D encoder (frozen)</div><div class="pipe"></div></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- LAYER 4 — LATENT PREDICTION (JEPA)             -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="layer" onclick="this.classList.toggle('open')">
+  <div class="layer-header">
+    <div class="layer-icon" style="background:#1f2a3d;"><span>🔮</span></div>
+    <div class="layer-title">
+      <h3>Latent Prediction</h3>
+      <div class="layer-sub">JEPA — predict transformations in embedding space</div>
+    </div>
+    <span class="layer-tag" style="background:var(--novel-glow);color:var(--novel);">Novel + Standard</span>
+    <span class="caret">▶</span>
+  </div>
+  <div class="layer-body">
+    <div class="layer-body-inner">
+      <div class="comp novel-comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--novel)"></div><div class="comp-name">TransformationPredictor</div></div>
+        <div class="comp-desc">The JEPA core. Takes a start embedding + action ID, predicts the target embedding. Operates entirely in latent space — no pixels, no decoder. This is the "world model".</div>
+        <span class="comp-tag" style="background:var(--novel-glow);color:var(--novel);">Novel</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">nn.Embedding <span class="dim">action IDs</span></div></div>
+        <div class="comp-desc">Converts integer action IDs (rotate_90=0, scale_up=3, recolor_blue=8…) into learned embedding vectors that get concatenated with the input state before prediction.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">MSE Loss <span class="dim">F.mse_loss</span></div></div>
+        <div class="comp-desc">Measures prediction error: ‖predicted_embedding − target_embedding‖². The predictor is trained to minimise this against the frozen encoder's output on the transformed image.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">torch.no_grad() <span class="dim">context</span></div></div>
+        <div class="comp-desc">Wraps all frozen-encoder forward passes. The v13 encoder is certified and locked — gradients only flow through the predictor being trained.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="connector"><div class="pipe"></div><div class="label">System 2 reasoning</div><div class="pipe"></div></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- LAYER 5 — SYSTEM 2 (v14 NOVEL MODULES)        -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="layer open" onclick="this.classList.toggle('open')">
+  <div class="layer-header">
+    <div class="layer-icon" style="background:#2d1f3d;"><span>⚡</span></div>
+    <div class="layer-title">
+      <h3>System 2 Reasoning</h3>
+      <div class="layer-sub">v14 modules — think before deciding</div>
+    </div>
+    <span class="layer-tag" style="background:var(--novel-glow);color:var(--novel);">Novel</span>
+    <span class="caret">▶</span>
+  </div>
+  <div class="layer-body">
+    <div class="layer-body-inner">
+      <div class="comp novel-comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--novel)"></div><div class="comp-name">ReasoningPredictor</div></div>
+        <div class="comp-desc">Beam search over latent trajectories. Spawns multiple hypotheses per step via MC Dropout + noise injection, scores them with per-axis integrity checks, and keeps the top-k by cumulative score across the full action sequence.</div>
+        <span class="comp-tag" style="background:var(--novel-glow);color:var(--novel);">Novel</span>
+      </div>
+      <div class="comp novel-comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--novel)"></div><div class="comp-name">Per-Axis Integrity Score</div></div>
+        <div class="comp-desc">Scores candidate embeddings using AXIS_DIMS_V13: checks global norm vs √128, penalises single-dimension spikes &gt;3σ, and verifies each axis carries energy_per_dim ≈ 1.0. The "physics check" for beam pruning.</div>
+        <span class="comp-tag" style="background:var(--novel-glow);color:var(--novel);">Novel</span>
+      </div>
+      <div class="comp novel-comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--novel)"></div><div class="comp-name">AdaptiveSizeHead</div></div>
+        <div class="comp-desc">Entropy-gated refinement. Fast pass → compute Shannon entropy on class_probs. If entropy &gt; 0.8 (confused), run 5 noisy forward passes (test-time augmentation) and average the logits. Only ambiguous inputs pay the extra compute.</div>
+        <span class="comp-tag" style="background:var(--novel-glow);color:var(--novel);">Novel</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">MC Dropout <span class="dim">sampling</span></div></div>
+        <div class="comp-desc">Dropout layers switched to train() mode at inference. Each forward pass with a different random mask = a different hypothesis. Standard technique repurposed as the randomness engine for beam expansion.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">Shannon Entropy</div></div>
+        <div class="comp-desc">H = −Σ p·log(p) over the 5 size class probabilities. Max entropy = ln(5) ≈ 1.6. Threshold at 0.8 separates "confident" from "confused". Standard information-theoretic measure.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">torch.topk <span class="dim">beam select</span></div></div>
+        <div class="comp-desc">Selects the top-k candidates by cumulative integrity score at each beam step. Standard PyTorch op — the novel part is what it's scoring, not the selection mechanism.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="connector"><div class="pipe"></div><div class="label">RL fine-tuning</div><div class="pipe"></div></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- LAYER 6 — RL FINE-TUNING                       -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="layer" onclick="this.classList.toggle('open')">
+  <div class="layer-header">
+    <div class="layer-icon" style="background:#1f2520;"><span>🎯</span></div>
+    <div class="layer-title">
+      <h3>RL Fine-Tuning</h3>
+      <div class="layer-sub">Reward-Weighted Regression on the predictor</div>
+    </div>
+    <span class="layer-tag" style="background:var(--novel-glow);color:var(--novel);">Novel + Standard</span>
+    <span class="caret">▶</span>
+  </div>
+  <div class="layer-body">
+    <div class="layer-body-inner">
+      <div class="comp novel-comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--novel)"></div><div class="comp-name">Reward-Weighted Regression</div></div>
+        <div class="comp-desc">Not pure RL — a hybrid. Generates 5 hypotheses per input via the predictor's dropout randomness. Scores each with a compound reward (cosine similarity + integrity). Weights MSE loss by sigmoid(advantage): good hypotheses get more gradient, bad ones get suppressed.</div>
+        <span class="comp-tag" style="background:var(--novel-glow);color:var(--novel);">Novel</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">Cosine Similarity</div></div>
+        <div class="comp-desc">F.cosine_similarity(pred, target) — the primary semantic reward signal. Rotation-invariant: only the direction in embedding space matters, not the magnitude.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">MSE Loss <span class="dim">+ Sigmoid weighting</span></div></div>
+        <div class="comp-desc">Standard MSE measures per-hypothesis error. Sigmoid converts the per-group advantage into a [0,1] weight. The weighting scheme is novel; MSE and Sigmoid themselves are textbook.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">AdamW <span class="dim">lr=1e-5</span></div></div>
+        <div class="comp-desc">Same optimizer as v13 training, but with a much lower learning rate. Only the predictor's parameters receive gradients — encoder stays frozen.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- EVALUATION                                     -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="layer" onclick="this.classList.toggle('open')">
+  <div class="layer-header">
+    <div class="layer-icon" style="background:#1f2533;"><span>🏆</span></div>
+    <div class="layer-title">
+      <h3>Certification</h3>
+      <div class="layer-sub">certify_unified.py — hard accuracy numbers</div>
+    </div>
+    <span class="layer-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+    <span class="caret">▶</span>
+  </div>
+  <div class="layer-body">
+    <div class="layer-body-inner">
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">Nearest Centroid Classifier</div></div>
+        <div class="comp-desc">500 samples per class → compute per-class centroids in the relevant axis dims → classify every sample by L2 distance to centroids. No learned classifier — pure geometry on the embedding.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">Confusion Matrix</div></div>
+        <div class="comp-desc">Per-axis, per-class breakdown of predictions vs ground truth. Standard diagnostic — shows exactly which classes the model confuses (e.g. small↔medium).</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+      <div class="comp">
+        <div class="comp-header"><div class="comp-dot" style="background:var(--std)"></div><div class="comp-name">L2 Distance <span class="dim">np.linalg.norm</span></div></div>
+        <div class="comp-desc">Euclidean distance between a sample's axis-slice and each class centroid. The simplest possible decision rule — if the embedding is good, this works.</div>
+        <span class="comp-tag" style="background:var(--std-glow);color:var(--std);">Standard</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- NOVEL SUMMARY BANNER                           -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="novel-banner">
+  <div class="nb-icon">🔬</div>
+  <div class="nb-body">
+    <h4>What's actually novel vs. what's industry plumbing</h4>
+    <p>
+      Out of ~21 distinct components in the stack, <strong style="color:var(--novel)">9 are novel</strong> and <strong style="color:var(--std)">12 are industry-standard</strong>. 
+      DINOv2 does the heavy perceptual lifting. PyTorch's nn.Linear, Dropout, ReLU, BCE, MSE, AdamW, and DataLoader are the scaffolding everything hangs on. 
+      The innovations — SIGReg, ordinal regression, JEPA prediction, beam search reasoning, entropy-gated refinement, and reward-weighted regression — are layered <em>on top of</em> that scaffolding. 
+      None of them would work without it.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 128-D AXIS MAP                                 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="axis-section open" onclick="this.classList.toggle('open')">
+  <div class="axis-header">
+    <span style="font-size:1rem;">📏</span>
+    <h3>128-Dimension Embedding Layout</h3>
+    <span class="caret">▶</span>
+  </div>
+  <div class="axis-body">
+    <div class="axis-inner">
+      <div class="axis-bar">
+        <div class="axis-seg shape">Shape</div>
+        <div class="axis-seg size">Size ★</div>
+        <div class="axis-seg material">Material</div>
+        <div class="axis-seg color">Color</div>
+        <div class="axis-seg location">Loc</div>
+        <div class="axis-seg orient">Orient</div>
+        <div class="axis-seg reserved">Reserved</div>
+      </div>
+      <div class="axis-legend">
+        <div class="axis-leg-item">
+          <div class="axis-leg-swatch" style="background:#1d3a5c;border:1px solid #2a5080;"></div>
+          <span>Shape</span><span class="dims">0–31 (32d)</span>
+        </div>
+        <div class="axis-leg-item">
+          <div class="axis-leg-swatch" style="background:linear-gradient(135deg,#3d2056,#5a2d82);border:1px solid rgba(188,140,255,.4);"></div>
+          <span>Size ★</span><span class="dims">32–47 (16d)</span>
+        </div>
+        <div class="axis-leg-item">
+          <div class="axis-leg-swatch" style="background:#1a3029;border:1px solid #2a5040;"></div>
+          <span>Material</span><span class="dims">48–63 (16d)</span>
+        </div>
+        <div class="axis-leg-item">
+          <div class="axis-leg-swatch" style="background:#2e3a1a;border:1px solid #4a5a2a;"></div>
+          <span>Color</span><span class="dims">64–79 (16d)</span>
+        </div>
+        <div class="axis-leg-item">
+          <div class="axis-leg-swatch" style="background:#3a2a1a;border:1px solid #5a4a2a;"></div>
+          <span>Location</span><span class="dims">80–87 (8d)</span>
+        </div>
+        <div class="axis-leg-item">
+          <div class="axis-leg-swatch" style="background:#1a2a3a;border:1px solid #2a4a5a;"></div>
+          <span>Orientation</span><span class="dims">88–103 (16d)</span>
+        </div>
+        <div class="axis-leg-item">
+          <div class="axis-leg-swatch" style="background:#1f1f1f;border:1px solid #333;"></div>
+          <span>Reserved</span><span class="dims">104–127 (24d)</span>
+        </div>
+      </div>
+      <p style="font-size:.74rem;color:var(--text-dim);margin-top:14px;line-height:1.5;">
+        ★ <strong style="color:var(--novel);">Size axis is the only one using ordinal regression</strong> — all others use standard linear projection + contrastive loss. 
+        SIGReg operates on the full 128-D vector during training to keep all axes alive and independent. 
+        The Per-Axis Integrity Scorer checks each axis's energy individually when pruning beam candidates.
+      </p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// Prevent event from bubbling when clicking inside layer-body
+document.querySelectorAll('.layer-body, .axis-body').forEach(el => {
+  el.addEventListener('click', e => e.stopPropagation());
+});
+</script>
+
+</body>
+</html>

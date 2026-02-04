@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CORTEX-12 v13 Training Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg-deep: #060a0f;
+  --bg-card: #0c1117;
+  --bg-card-alt: #101820;
+  --border: rgba(80,160,220,0.15);
+  --accent: #4fa8e0;
+  --accent-glow: rgba(79,168,224,0.35);
+  --accent2: #e066a0;
+  --accent2-glow: rgba(224,102,160,0.35);
+  --accent3: #50e6a8;
+  --accent3-glow: rgba(80,230,168,0.3);
+  --accent4: #e8c44a;
+  --text-primary: #e2eaf0;
+  --text-secondary: #7a95a8;
+  --text-dim: #445a6a;
+  --font-display: 'Orbitron', monospace;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Ambient background grid */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(79,168,224,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,168,224,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ambient glow orbs */
+.orb {
+  position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.18; pointer-events: none; z-index: 0;
+}
+.orb--1 { width: 500px; height: 500px; background: var(--accent); top: -180px; left: -140px; }
+.orb--2 { width: 400px; height: 400px; background: var(--accent2); bottom: -120px; right: -100px; }
+.orb--3 { width: 300px; height: 300px; background: var(--accent3); top: 50%; left: 50%; transform: translate(-50%,-50%); opacity: 0.08; }
+
+/* ─── LAYOUT ─── */
+.wrapper { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 24px 18px 48px; }
+
+/* ─── HEADER ─── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0 32px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; gap: 12px;
+}
+.header__left { display: flex; align-items: center; gap: 14px; }
+.header__icon {
+  width: 42px; height: 42px;
+  border: 2px solid var(--accent); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(79,168,224,0.12), rgba(224,102,160,0.08));
+  box-shadow: 0 0 18px var(--accent-glow);
+  animation: iconPulse 3s ease-in-out infinite;
+}
+.header__icon svg { width: 22px; height: 22px; }
+@keyframes iconPulse {
+  0%,100% { box-shadow: 0 0 18px var(--accent-glow); }
+  50%     { box-shadow: 0 0 32px var(--accent-glow); }
+}
+.header__title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; letter-spacing: 2px; color: var(--text-primary); }
+.header__title span { color: var(--accent); }
+.header__sub { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim); letter-spacing: 1px; margin-top: 2px; }
+.header__badge {
+  font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 1.5px;
+  background: linear-gradient(135deg, rgba(80,230,168,0.12), rgba(80,230,168,0.04));
+  border: 1px solid rgba(80,230,168,0.3);
+  color: var(--accent3); padding: 5px 12px; border-radius: 20px;
+  display: flex; align-items: center; gap: 6px;
+}
+.header__badge::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--accent3); box-shadow: 0 0 6px var(--accent3-glow); animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* Playback button */
+.playback-btn {
+  font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 1px;
+  background: linear-gradient(135deg, rgba(79,168,224,0.15), rgba(79,168,224,0.05));
+  border: 1px solid rgba(79,168,224,0.4);
+  color: var(--accent); padding: 6px 14px; border-radius: 20px;
+  display: flex; align-items: center; gap: 7px;
+  cursor: pointer; transition: all 0.3s ease;
+}
+.playback-btn:hover {
+  background: linear-gradient(135deg, rgba(79,168,224,0.25), rgba(79,168,224,0.1));
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.playback-btn:active { transform: translateY(0); }
+.playback-btn.playing { 
+  border-color: var(--accent2);
+  color: var(--accent2);
+  background: linear-gradient(135deg, rgba(224,102,160,0.15), rgba(224,102,160,0.05));
+}
+.playback-btn.playing:hover {
+  background: linear-gradient(135deg, rgba(224,102,160,0.25), rgba(224,102,160,0.1));
+  border-color: var(--accent2);
+  box-shadow: 0 0 12px var(--accent2-glow);
+}
+
+/* ─── STAT CARDS ROW ─── */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 28px 0; }
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px 16px;
+  position: relative; overflow: hidden;
+  transition: border-color .3s, box-shadow .3s;
+}
+.stat-card:hover { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+.stat-card__bar { position: absolute; top: 0; left: 0; height: 3px; width: 100%; }
+.stat-card--blue .stat-card__bar   { background: linear-gradient(90deg, var(--accent), transparent); }
+.stat-card--pink .stat-card__bar   { background: linear-gradient(90deg, var(--accent2), transparent); }
+.stat-card--green .stat-card__bar  { background: linear-gradient(90deg, var(--accent3), transparent); }
+.stat-card--gold .stat-card__bar   { background: linear-gradient(90deg, var(--accent4), transparent); }
+.stat-card__label { font-family: var(--font-mono); font-size: 0.64rem; color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+.stat-card__val { font-family: var(--font-display); font-size: 1.55rem; font-weight: 700; }
+.stat-card--blue .stat-card__val  { color: var(--accent); }
+.stat-card--pink .stat-card__val  { color: var(--accent2); }
+.stat-card--green .stat-card__val { color: var(--accent3); }
+.stat-card--gold .stat-card__val  { color: var(--accent4); }
+.stat-card__detail { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-dim); margin-top: 5px; }
+
+/* Counter animation */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stat-card__val { animation: countUp 0.6s ease-out forwards; }
+
+/* ─── SECTION GRID ─── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 24px; }
+
+/* ─── CARD PANELS ─── */
+.panel {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 22px 20px;
+  position: relative;
+}
+.panel--full { grid-column: 1 / -1; }
+.panel__head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px; flex-wrap: wrap; gap: 8px;
+}
+.panel__title {
+  font-family: var(--font-display); font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 2px; color: var(--text-secondary); text-transform: uppercase;
+}
+.panel__title span { color: var(--accent); }
+
+/* Legend pills */
+.legend { display: flex; gap: 10px; flex-wrap: wrap; }
+.legend__item { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-dim); }
+.legend__dot { width: 10px; height: 10px; border-radius: 3px; }
+
+/* ─── SVG CHARTS ─── */
+.chart-wrap { width: 100%; overflow: hidden; }
+svg.chart { display: block; width: 100%; height: auto; }
+
+/* Animated line drawing */
+.chart-line {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: drawLine 3s ease-out forwards;
+}
+.chart-line--delayed { animation-delay: 0.3s; }
+.chart-line--delayed2 { animation-delay: 0.6s; }
+
+@keyframes drawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Animated fills */
+.chart-fill {
+  opacity: 0;
+  animation: fadeInFill 2s ease-out forwards;
+}
+.chart-fill--delayed { animation-delay: 0.4s; }
+.chart-fill--delayed2 { animation-delay: 0.7s; }
+
+@keyframes fadeInFill {
+  to { opacity: 1; }
+}
+
+/* Best dot animations */
+.best-dot {
+  animation: dotPulse 2s ease-in-out infinite;
+  transform-origin: center;
+}
+.best-dot--outer {
+  animation: dotRing 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.85; }
+}
+
+@keyframes dotRing {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.3); opacity: 0.2; }
+}
+
+/* Grid line fade in */
+.grid-line, .axis-label {
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out forwards;
+}
+.grid-line { animation-delay: 0.1s; }
+.axis-label { animation-delay: 0.2s; }
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* ─── AXIS LABELS ─── */
+.axis-label { font-family: var(--font-mono); font-size: 9px; fill: var(--text-dim); }
+.grid-line { stroke: rgba(79,168,224,0.07); stroke-width: 1; }
+
+/* ─── ARCHITECTURE TABLE ─── */
+.arch-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.arch-table th {
+  font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 1.2px; padding: 6px 10px;
+  border-bottom: 1px solid var(--border); text-align: left;
+}
+.arch-table td {
+  font-family: var(--font-mono); font-size: 0.67rem; color: var(--text-secondary);
+  padding: 8px 10px; border-bottom: 1px solid rgba(79,168,224,0.06);
+}
+.arch-table tr:last-child td { border-bottom: none; }
+.arch-table td:first-child { color: var(--text-primary); font-weight: 500; }
+.tag {
+  display: inline-block; font-size: 0.58rem; padding: 2px 8px; border-radius: 10px;
+  font-family: var(--font-mono); letter-spacing: 0.5px;
+}
+.tag--frozen { background: rgba(79,168,224,0.1); color: var(--accent); border: 1px solid rgba(79,168,224,0.25); }
+.tag--train  { background: rgba(80,230,168,0.1); color: var(--accent3); border: 1px solid rgba(80,230,168,0.25); }
+
+/* ─── TIMELINE / CHECKPOINTS ─── */
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before { 
+  content:''; position:absolute; left:8px; top:0; bottom:0; width:2px; 
+  background: linear-gradient(180deg, var(--accent), var(--accent2)); 
+  border-radius:2px;
+  transform: scaleY(0); transform-origin: top;
+  animation: timelineGrow 1.5s ease-out 0.5s forwards;
+}
+@keyframes timelineGrow {
+  to { transform: scaleY(1); }
+}
+.timeline__item { 
+  position: relative; padding: 10px 0 10px 14px;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+.timeline__item:nth-child(1) { animation-delay: 0.7s; }
+.timeline__item:nth-child(2) { animation-delay: 0.85s; }
+.timeline__item:nth-child(3) { animation-delay: 1s; }
+.timeline__item:nth-child(4) { animation-delay: 1.15s; }
+.timeline__item:nth-child(5) { animation-delay: 1.3s; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.timeline__item::before {
+  content:''; position:absolute; left:-16px; top:16px;
+  width:10px; height:10px; border-radius:50%;
+  background: var(--bg-card); border: 2px solid var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.timeline__item--best::before { border-color: var(--accent3); box-shadow: 0 0 8px var(--accent3-glow); background: rgba(80,230,168,0.15); }
+.timeline__epoch { font-family: var(--font-display); font-size: 0.7rem; color: var(--accent); font-weight: 600; }
+.timeline__item--best .timeline__epoch { color: var(--accent3); }
+.timeline__info { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-dim); margin-top: 2px; }
+.timeline__info em { color: var(--text-secondary); font-style: normal; }
+
+/* ─── PROGRESS BAR ─── */
+.progress-wrap { margin-top: 6px; }
+.progress-label { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-dim); margin-bottom: 5px; }
+.progress-track { height: 5px; background: var(--bg-card-alt); border-radius: 3px; overflow: hidden; }
+.progress-fill { 
+  height: 100%; border-radius: 3px; 
+  width: 0 !important; /* Start at 0 */
+  animation: progressGrow 2s ease-out forwards;
+}
+@keyframes progressGrow {
+  to { width: var(--target-width) !important; }
+}
+.progress-fill--blue  { background: linear-gradient(90deg, var(--accent), #6fc3f0); }
+.progress-fill--pink  { background: linear-gradient(90deg, var(--accent2), #e88ab8); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+  .panel--full { grid-column: auto; }
+  .header { flex-direction: column; align-items: flex-start; }
+  .wrapper { padding: 16px 12px 40px; }
+  .stat-card { padding: 14px 12px; }
+  .panel { padding: 18px 14px; }
+}
+@media (max-width: 420px) {
+  .stats-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-card__val { font-size: 1.25rem; }
+  .header__title { font-size: 1.05rem; }
+}
+
+/* Fade-in */
+@keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+.panel, .stat-card { animation: fadeUp .45s ease both; }
+.stat-card:nth-child(1){animation-delay:.05s}
+.stat-card:nth-child(2){animation-delay:.1s}
+.stat-card:nth-child(3){animation-delay:.15s}
+.stat-card:nth-child(4){animation-delay:.2s}
+
+/* Mini sparkline */
+.sparkline-row { display: flex; align-items: flex-end; gap: 2px; height: 28px; margin-top: 8px; }
+.sparkline-bar { width: 100%; background: var(--accent); border-radius: 2px 2px 0 0; opacity: 0.6; transition: opacity .2s; }
+.sparkline-bar:hover { opacity: 1; }
+.sparkline-row--pink .sparkline-bar { background: var(--accent2); }
+</style>
+</head>
+<body>
+
+<div class="orb orb--1"></div>
+<div class="orb orb--2"></div>
+<div class="orb orb--3"></div>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header__left">
+      <div class="header__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/>
+          <line x1="12" y1="22" x2="12" y2="15.5"/>
+          <line x1="22" y1="8.5" x2="12" y2="15.5"/>
+          <line x1="2" y1="8.5" x2="12" y2="15.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="header__title">CORTEX<span>-12</span> <span style="color:var(--text-dim);font-weight:400;font-size:.85rem;">v13</span></div>
+        <div class="header__sub">JEPA TRAINING · SIGREG + ORDINAL SIZE · DINOv2 BACKBONE</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <div class="header__badge">TRAINING ACTIVE</div>
+      <button id="playbackBtn" class="playback-btn">
+        <svg class="play-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <svg class="pause-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+          <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+        </svg>
+        <span class="playback-text">Replay Training</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- STAT CARDS -->
+  <div class="stats-row">
+    <div class="stat-card stat-card--blue">
+      <div class="stat-card__bar"></div>
+      <div class="stat-card__label">Best Total Loss</div>
+      <div class="stat-card__val">5.917</div>
+      <div class="stat-card__detail">SIGReg run · Epoch 69 🔥</div>
+    </div>
+    <div class="stat-card stat-card--pink">
+      <div class="stat-card__bar"></div>
+      <div class="stat-card__label">Size-Only Best</div>
+      <div class="stat-card__val">6.573</div>
+      <div class="stat-card__detail">Size fine-tune · Epoch 54</div>
+    </div>
+    <div class="stat-card stat-card--green">
+      <div class="stat-card__bar"></div>
+      <div class="stat-card__label">Dataset</div>
+      <div class="stat-card__val">54K</div>
+      <div class="stat-card__detail">6 shapes · 12 colors · 5 sizes</div>
+    </div>
+    <div class="stat-card stat-card--gold">
+      <div class="stat-card__bar"></div>
+      <div class="stat-card__label">Epochs Logged</div>
+      <div class="stat-card__val">81 / 89</div>
+      <div class="stat-card__detail">SIGReg 81 · Size 89</div>
+    </div>
+  </div>
+
+  <!-- MAIN CHARTS ROW -->
+  <div class="grid-2">
+
+    <!-- SIGREG LOSS CHART -->
+    <div class="panel" style="animation-delay:.22s">
+      <div class="panel__head">
+        <div class="panel__title">SIGReg <span>Total Loss</span></div>
+        <div class="legend">
+          <div class="legend__item"><div class="legend__dot" style="background:var(--accent)"></div>Total</div>
+          <div class="legend__item"><div class="legend__dot" style="background:var(--accent3)"></div>SIGReg</div>
+          <div class="legend__item"><div class="legend__dot" style="background:var(--accent4)"></div>Size</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <svg class="chart" id="chartSigreg" viewBox="0 0 580 220"></svg>
+      </div>
+    </div>
+
+    <!-- SIZE-ONLY LOSS CHART -->
+    <div class="panel" style="animation-delay:.28s">
+      <div class="panel__head">
+        <div class="panel__title">Size-Only <span>Fine-Tune Loss</span></div>
+        <div class="legend">
+          <div class="legend__item"><div class="legend__dot" style="background:var(--accent2)"></div>Loss</div>
+          <div class="legend__item"><div class="legend__dot" style="background:var(--accent4)"></div>Best</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <svg class="chart" id="chartSize" viewBox="0 0 580 220"></svg>
+      </div>
+    </div>
+
+    <!-- LR CURVES COMPARISON -->
+    <div class="panel" style="animation-delay:.34s">
+      <div class="panel__head">
+        <div class="panel__title">Learning Rate <span>Schedule</span></div>
+        <div class="legend">
+          <div class="legend__item"><div class="legend__dot" style="background:var(--accent)"></div>SIGReg (1e-4)</div>
+          <div class="legend__item"><div class="legend__dot" style="background:var(--accent2)"></div>Size (5e-5)</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <svg class="chart" id="chartLR" viewBox="0 0 580 180"></svg>
+      </div>
+    </div>
+
+    <!-- ARCHITECTURE PANEL -->
+    <div class="panel" style="animation-delay:.36s">
+      <div class="panel__head">
+        <div class="panel__title"><span>Architecture</span> · Projectors</div>
+      </div>
+      <table class="arch-table">
+        <thead><tr><th>Projection Head</th><th>Shape</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>shape_proj</td><td style="color:var(--text-dim)">(32, 384)</td><td><span class="tag tag--frozen">Frozen</span></td></tr>
+          <tr><td>size_proj</td><td style="color:var(--text-dim)">(16, 384)</td><td><span class="tag tag--train">Trainable</span></td></tr>
+          <tr><td>material_proj</td><td style="color:var(--text-dim)">(16, 384)</td><td><span class="tag tag--frozen">Frozen</span></td></tr>
+          <tr><td>color_proj</td><td style="color:var(--text-dim)">(16, 384)</td><td><span class="tag tag--frozen">Frozen</span></td></tr>
+          <tr><td>location_proj</td><td style="color:var(--text-dim)">(8, 384)</td><td><span class="tag tag--frozen">Frozen</span></td></tr>
+          <tr><td>orientation_proj</td><td style="color:var(--text-dim)">(16, 384)</td><td><span class="tag tag--frozen">Frozen</span></td></tr>
+        </tbody>
+      </table>
+      <!-- Progress bars -->
+      <div style="margin-top:18px">
+        <div class="progress-wrap">
+          <div class="progress-label"><span>SIGReg Run</span><span>81%</span></div>
+          <div class="progress-track"><div class="progress-fill progress-fill--blue" style="--target-width:81%"></div></div>
+        </div>
+        <div class="progress-wrap" style="margin-top:10px">
+          <div class="progress-label"><span>Size-Only Run</span><span>89%</span></div>
+          <div class="progress-track"><div class="progress-fill progress-fill--pink" style="--target-width:89%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECKPOINTS TIMELINE (full width) -->
+    <div class="panel panel--full" style="animation-delay:.40s">
+      <div class="panel__head">
+        <div class="panel__title">Checkpoint <span>History</span></div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+        <div>
+          <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--accent);letter-spacing:1px;margin-bottom:10px">── SIGREG RUN ──</div>
+          <div class="timeline">
+            <div class="timeline__item timeline__item--best">
+              <div class="timeline__epoch">Epoch 69 ✦ Best 🔥</div>
+              <div class="timeline__info">Total: <em>5.9171</em> · SIGReg: 5.9118 · Size: 0.0053</div>
+            </div>
+            <div class="timeline__item">
+              <div class="timeline__epoch">Epoch 81 — Latest</div>
+              <div class="timeline__info">Total: <em>5.9677</em> · SIGReg: 5.9633 · Size: 0.0045</div>
+            </div>
+            <div class="timeline__item">
+              <div class="timeline__epoch">Epoch 80 — Strong</div>
+              <div class="timeline__info">Total: <em>5.9245</em> · SIGReg: 5.9198 · Size: 0.0047</div>
+            </div>
+            <div class="timeline__item">
+              <div class="timeline__epoch">Epoch 75 — Checkpoint</div>
+              <div class="timeline__info">Total: <em>5.9582</em> · Saved to cortex_v13_0075.pt</div>
+            </div>
+            <div class="timeline__item">
+              <div class="timeline__epoch">Epoch 50 — Checkpoint</div>
+              <div class="timeline__info">Total: <em>5.9483</em> · Saved to cortex_v13_0050.pt</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--accent2);letter-spacing:1px;margin-bottom:10px">── SIZE-ONLY RUN ──</div>
+          <div class="timeline">
+            <div class="timeline__item timeline__item--best" style="--accent:var(--accent2)">
+              <div class="timeline__epoch" style="color:var(--accent2)">Epoch 54 ✦ Best</div>
+              <div class="timeline__info">Loss: <em>6.5727</em> · LR: 2.27e-05</div>
+            </div>
+            <div class="timeline__item">
+              <div class="timeline__epoch" style="color:var(--accent2)">Epoch 89 — Latest</div>
+              <div class="timeline__info">Loss: <em>6.6827</em> · LR: 1.85e-06</div>
+            </div>
+            <div class="timeline__item">
+              <div class="timeline__epoch" style="color:var(--accent2)">Epoch 87 — Near Best</div>
+              <div class="timeline__info">Loss: <em>6.5923</em> · LR: 2.47e-06</div>
+            </div>
+            <div class="timeline__item">
+              <div class="timeline__epoch" style="color:var(--accent2)">Epoch 75 — Checkpoint</div>
+              <div class="timeline__info">Loss: <em>6.6836</em> · Saved to cortex_size_only_0075.pt</div>
+            </div>
+            <div class="timeline__item">
+              <div class="timeline__epoch" style="color:var(--accent2)">Epoch 50 — Checkpoint</div>
+              <div class="timeline__info">Loss: <em>6.6862</em> · Saved to cortex_size_only_0050.pt</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end grid-2 -->
+</div><!-- end wrapper -->
+
+<script>
+// ─── DATA ───
+const sigregData = [
+  [1,6.4477,6.5206,1.00e-4],[2,6.0867,6.1196,1.00e-4],[3,6.0748,6.1011,9.99e-5],
+  [4,6.1020,6.1254,9.98e-5],[5,6.0622,6.0836,9.96e-5],[6,6.0426,6.0623,9.94e-5],
+  [7,5.9926,6.0113,9.91e-5],[8,6.0139,6.0318,9.88e-5],[9,6.0340,6.0512,9.84e-5],
+  [10,6.0095,6.0258,9.80e-5],[11,6.0217,6.0376,9.76e-5],[12,6.0323,6.0471,9.71e-5],
+  [13,6.0061,6.0209,9.65e-5],[14,5.9870,6.0011,9.59e-5],[15,6.0264,6.0407,9.53e-5],
+  [16,5.9924,6.0056,9.46e-5],[17,5.9833,5.9964,9.39e-5],[18,5.9711,5.9844,9.31e-5],
+  [19,6.0267,6.0398,9.23e-5],[20,5.9370,5.9498,9.14e-5],[21,5.9982,6.0106,9.05e-5],
+  [22,5.9731,5.9852,8.96e-5],[23,5.9962,6.0078,8.86e-5],[24,5.9743,5.9863,8.76e-5],
+  [25,5.9467,5.9581,8.66e-5],[26,5.9783,5.9894,8.55e-5],[27,5.9623,5.9735,8.44e-5],
+  [28,5.9378,5.9485,8.32e-5],[29,5.9655,5.9758,8.21e-5],[30,5.9839,5.9943,8.08e-5],
+  [31,5.9924,6.0027,7.96e-5],[32,5.9362,5.9466,7.83e-5],[33,5.9765,5.9865,7.70e-5],
+  [34,5.9327,5.9425,7.57e-5],[35,5.9408,5.9503,7.43e-5],[36,5.9598,5.9693,7.30e-5],
+  [37,5.9418,5.9511,7.16e-5],[38,5.9940,6.0033,7.02e-5],[39,5.9267,5.9359,6.87e-5],
+  [40,5.9235,5.9322,6.73e-5],[41,5.9643,5.9730,6.58e-5],[42,5.9684,5.9769,6.43e-5],
+  [43,6.0019,6.0103,6.28e-5],[44,5.9864,5.9949,6.13e-5],[45,5.9596,5.9678,5.98e-5],
+  [46,5.9794,5.9873,5.82e-5],[47,5.9536,5.9615,5.67e-5],[48,5.9621,5.9701,5.52e-5],
+  [49,5.9468,5.9548,5.36e-5],[50,5.9408,5.9483,5.21e-5],[51,5.9969,6.0043,5.05e-5],
+  [52,5.9678,5.9753,4.89e-5],[53,5.9812,5.9883,4.74e-5],[54,5.9872,5.9942,4.58e-5],
+  [55,5.9634,5.9702,4.43e-5],[56,5.9376,5.9444,4.28e-5],[57,5.9528,5.9596,4.12e-5],
+  [58,5.9469,5.9534,3.97e-5],[59,5.9844,5.9909,3.82e-5],[60,5.9898,5.9964,3.67e-5],
+  [61,5.9612,5.9676,3.52e-5],[62,5.9272,5.9333,3.37e-5],[63,5.9575,5.9635,3.23e-5],
+  [64,5.9443,5.9504,3.08e-5],[65,5.9544,5.9602,2.94e-5],[66,5.9990,6.0047,2.80e-5],
+  [67,5.9783,5.9840,2.67e-5],[68,5.9548,5.9604,2.53e-5],[69,5.9118,5.9171,2.40e-5],
+  [70,5.9536,5.9591,2.27e-5],[71,5.9425,5.9478,2.14e-5],[72,5.9723,5.9776,2.02e-5],
+  [73,5.9956,6.0007,1.89e-5],[74,5.9609,5.9660,1.78e-5],[75,5.9533,5.9582,1.66e-5],
+  [76,5.9681,5.9729,1.55e-5],[77,5.9319,5.9367,1.44e-5],[78,5.9694,5.9742,1.34e-5],
+  [79,5.9456,5.9504,1.24e-5],[80,5.9198,5.9245,1.14e-5],[81,5.9633,5.9677,1.05e-5]
+];
+// size losses extracted
+const sizeOnlyLoss = sigregData.map(d => parseFloat((d[2]-d[1]).toFixed(4)));
+
+const sizeData = [
+  [1,6.8608],[2,6.8356],[3,6.7334],[4,6.7441],[5,6.7063],[6,6.7624],[7,6.7141],
+  [8,6.7174],[9,6.7578],[10,6.7516],[11,6.6154],[12,6.6953],[13,6.6219],[14,6.7372],
+  [15,6.6330],[16,6.6994],[17,6.7141],[18,6.6793],[19,6.6459],[20,6.6249],[21,6.6743],
+  [22,6.7406],[23,6.6880],[24,6.6208],[25,6.7585],[26,6.6796],[27,6.7032],[28,6.6024],
+  [29,6.6550],[30,6.6706],[31,6.6269],[32,6.7142],[33,6.7635],[34,6.6806],[35,6.6936],
+  [36,6.7474],[37,6.6952],[38,6.7003],[39,6.6533],[40,6.6305],[41,6.6989],[42,6.6945],
+  [43,6.6515],[44,6.6688],[45,6.6751],[46,6.7395],[47,6.7499],[48,6.7136],[49,6.6427],
+  [50,6.6862],[51,6.7405],[52,6.7158],[53,6.7488],[54,6.5727],[55,6.6982],[56,6.7166],
+  [57,6.6512],[58,6.6694],[59,6.7062],[60,6.6783],[61,6.6643],[62,6.7012],[63,6.7128],
+  [64,6.6815],[65,6.6541],[66,6.5951],[67,6.6376],[68,6.6209],[69,6.6924],[70,6.6212],
+  [71,6.6261],[72,6.7700],[73,6.6026],[74,6.6681],[75,6.6836],[76,6.6895],[77,6.7627],
+  [78,6.6555],[79,6.7328],[80,6.6477],[81,6.7204],[82,6.7262],[83,6.7287],[84,6.6789],
+  [85,6.6851],[86,6.6938],[87,6.5923],[88,6.6591],[89,6.6827]
+];
+
+const lrSigreg = sigregData.map(d => [d[0], d[3]]);
+const lrSize   = [[1,5e-5],[2,5e-5],[3,5e-5],[4,4.99e-5],[5,4.98e-5],[10,4.90e-5],[15,4.76e-5],[20,4.57e-5],[25,4.32e-5],[30,4.03e-5],[35,3.71e-5],[40,3.35e-5],[45,2.97e-5],[50,2.58e-5],[55,2.19e-5],[60,1.81e-5],[65,1.44e-5],[69,1.17e-5],[70,1.10e-5],[75,7.97e-6],[79,5.83e-6],[80,5.34e-6],[85,3.19e-6],[89,1.85e-6]];
+
+// ─── GLOBAL STATE ───
+let animationFrames = {};
+let isPlaying = false;
+
+// ─── ANIMATED POLYLINE CHART WITH PLAYBACK ───
+function drawLineChart(svgId, datasets, opts) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  
+  const W = 580, H = opts.height || 220;
+  const pad = { t:20, r:24, b:36, l:48 };
+  const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+
+  // compute global min/max x
+  let minX = Infinity, maxX = -Infinity;
+  datasets.forEach(ds => {
+    if (!ds.points || ds.points.length === 0) return;
+    ds.points.forEach(p => { 
+      if (p && p.length >= 2) {
+        if(p[0]<minX)minX=p[0]; 
+        if(p[0]>maxX)maxX=p[0]; 
+      }
+    });
+  });
+
+  // per-dataset y range
+  let allY = [];
+  datasets.forEach(ds => {
+    if (!ds.points || ds.points.length === 0) return;
+    ds.points.forEach(p => {
+      if (p && p.length >= 2) allY.push(p[1]);
+    });
+  });
+  
+  if (allY.length === 0) return;
+  
+  let minY = Math.min(...allY), maxY = Math.max(...allY);
+  const yPad = (maxY - minY) * 0.08;
+  minY -= yPad; maxY += yPad;
+
+  const scX = v => pad.l + (v - minX) / (maxX - minX) * cw;
+  const scY = v => pad.t + (1 - (v - minY) / (maxY - minY)) * ch;
+
+  // Store full datasets for playback
+  if (!animationFrames[svgId]) {
+    animationFrames[svgId] = {
+      datasets: datasets,
+      currentFrame: datasets[0] ? datasets[0].points.length : 0,
+      maxFrames: datasets[0] ? datasets[0].points.length : 0,
+      scX, scY, W, H, pad, minY, maxY, minX, maxX
+    };
+  }
+
+  function renderFrame(frameIndex) {
+    const state = animationFrames[svgId];
+    let html = '';
+
+    // Grid lines
+    const yTicks = 5;
+    for (let i = 0; i <= yTicks; i++) {
+      const val = minY + (maxY - minY) * i / yTicks;
+      const y = scY(val);
+      html += `<line class="grid-line" x1="${pad.l}" y1="${y}" x2="${W-pad.r}" y2="${y}"/>`;
+      html += `<text class="axis-label" x="${pad.l-6}" y="${y+3}" text-anchor="end">${val.toFixed(3)}</text>`;
+    }
+    // X ticks
+    const step = Math.max(1, Math.ceil((maxX - minX) / 8));
+    for (let v = minX; v <= maxX; v += step) {
+      const x = scX(v);
+      html += `<line class="grid-line" x1="${x}" y1="${pad.t}" x2="${x}" y2="${H-pad.b}"/>`;
+      html += `<text class="axis-label" x="${x}" y="${H-pad.b+16}" text-anchor="middle">${v}</text>`;
+    }
+    html += `<text class="axis-label" x="${pad.l-6}" y="${pad.t-6}" text-anchor="end" style="fill:var(--text-dim)">loss</text>`;
+    html += `<text class="axis-label" x="${W-pad.r}" y="${H-pad.b+16}" text-anchor="end" style="fill:var(--text-dim)">epoch</text>`;
+
+    // Current epoch indicator
+    if (frameIndex > 0 && frameIndex <= maxX) {
+      html += `<text x="${W-pad.r-50}" y="${pad.t+15}" class="axis-label" style="fill:var(--accent);font-size:11px;font-weight:600">EPOCH ${frameIndex}</text>`;
+    }
+
+    // Datasets
+    datasets.forEach((ds, i) => {
+      if (!ds.points || ds.points.length === 0) return;
+      const allPts = ds.points.filter(p => p && p.length >= 2);
+      if (allPts.length === 0) return;
+      
+      // Only show points up to current frame
+      const pts = allPts.slice(0, Math.min(frameIndex, allPts.length));
+      if (pts.length === 0) return;
+
+      // Gradient fill
+      const gid = `grad_${svgId}_${i}`;
+      html += `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${ds.color}" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="${ds.color}" stop-opacity="0"/>
+      </linearGradient></defs>`;
+
+      let polyPts = pts.map(p => `${scX(p[0])},${scY(p[1])}`).join(' ');
+      
+      // Fill area
+      if (pts.length > 1) {
+        let fillPts = polyPts + `,${scX(pts[pts.length-1][0])},${H-pad.b} ${scX(pts[0][0])},${H-pad.b}`;
+        html += `<polygon points="${fillPts}" fill="url(#${gid})" stroke="none"/>`;
+      }
+      
+      // Line
+      if (pts.length > 1) {
+        html += `<polyline points="${polyPts}" fill="none" stroke="${ds.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+      }
+
+      // Current point (animated dot at the "front")
+      if (pts.length > 0) {
+        const cp = pts[pts.length - 1];
+        html += `<circle cx="${scX(cp[0])}" cy="${scY(cp[1])}" r="3" fill="${ds.color}" opacity="0.8"/>`;
+        html += `<circle cx="${scX(cp[0])}" cy="${scY(cp[1])}" r="6" fill="none" stroke="${ds.color}" stroke-width="1.5" opacity="0.4">
+          <animate attributeName="r" values="6;10;6" dur="1s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.4;0;0.4" dur="1s" repeatCount="indefinite"/>
+        </circle>`;
+      }
+
+      // Best dot (only show if we've reached it)
+      if (ds.bestIdx !== undefined && ds.bestIdx !== null && ds.bestIdx >= 0 && frameIndex > ds.bestIdx) {
+        const bp = allPts[ds.bestIdx];
+        if (bp && bp.length >= 2) {
+          html += `<circle class="best-dot" cx="${scX(bp[0])}" cy="${scY(bp[1])}" r="4" fill="${ds.color}" stroke="var(--bg-card)" stroke-width="2"/>`;
+          html += `<circle class="best-dot best-dot--outer" cx="${scX(bp[0])}" cy="${scY(bp[1])}" r="7" fill="none" stroke="${ds.color}" stroke-width="1" opacity="0.5"/>`;
+        }
+      }
+    });
+
+    svg.innerHTML = html;
+  }
+
+  // Initial render at full data
+  renderFrame(animationFrames[svgId].maxFrames);
+  animationFrames[svgId].renderFrame = renderFrame;
+}
+
+// ─── PLAYBACK CONTROL ───
+function startPlayback() {
+  if (isPlaying) {
+    stopPlayback();
+    return;
+  }
+  
+  isPlaying = true;
+  const btn = document.getElementById('playbackBtn');
+  if (btn) {
+    btn.classList.add('playing');
+    const playIcon = btn.querySelector('.play-icon');
+    const pauseIcon = btn.querySelector('.pause-icon');
+    const playbackText = btn.querySelector('.playback-text');
+    if (playIcon) playIcon.style.display = 'none';
+    if (pauseIcon) pauseIcon.style.display = 'block';
+    if (playbackText) playbackText.textContent = 'Playing...';
+  }
+
+  // Reset all charts to frame 0
+  Object.keys(animationFrames).forEach(key => {
+    if (key !== 'playbackTimer') {
+      const state = animationFrames[key];
+      if (state) state.currentFrame = 0;
+    }
+  });
+
+  const fps = 12; // 12 frames per second for smooth but visible progress
+  const interval = 1000 / fps;
+  
+  const timer = setInterval(() => {
+    let anyActive = false;
+    
+    Object.keys(animationFrames).forEach(key => {
+      if (key !== 'playbackTimer') {
+        const state = animationFrames[key];
+        if (state && state.renderFrame && typeof state.renderFrame === 'function') {
+          if (state.currentFrame < state.maxFrames) {
+            state.currentFrame++;
+            state.renderFrame(state.currentFrame);
+            anyActive = true;
+          }
+        }
+      }
+    });
+    
+    if (!anyActive) {
+      stopPlayback();
+    }
+  }, interval);
+  
+  animationFrames.playbackTimer = timer;
+}
+
+function stopPlayback() {
+  isPlaying = false;
+  const btn = document.getElementById('playbackBtn');
+  if (btn) {
+    btn.classList.remove('playing');
+    const playIcon = btn.querySelector('.play-icon');
+    const pauseIcon = btn.querySelector('.pause-icon');
+    const playbackText = btn.querySelector('.playback-text');
+    if (playIcon) playIcon.style.display = 'block';
+    if (pauseIcon) pauseIcon.style.display = 'none';
+    if (playbackText) playbackText.textContent = 'Replay Training';
+  }
+  
+  if (animationFrames.playbackTimer) {
+    clearInterval(animationFrames.playbackTimer);
+    animationFrames.playbackTimer = null;
+  }
+  
+  // Reset to full view
+  Object.keys(animationFrames).forEach(key => {
+    if (key !== 'playbackTimer') {
+      const state = animationFrames[key];
+      if (state && state.renderFrame && typeof state.renderFrame === 'function') {
+        state.currentFrame = state.maxFrames;
+        state.renderFrame(state.maxFrames);
+      }
+    }
+  });
+}
+
+// ─── SIGREG CHART (Total & SIGReg lines) ───
+drawLineChart('chartSigreg', [
+  { color: 'var(--accent3)', points: sigregData.map(d=>[d[0],d[1]]), bestIdx: 39 },  // SIGReg only
+  { color: 'var(--accent)',  points: sigregData.map(d=>[d[0],d[2]]), bestIdx: 39 },  // Total
+  { color: 'var(--accent4)', points: sigregData.map(d=>[d[0], d[2]-d[1]]).map(p=>[p[0],p[1]+5.92]), bestIdx: null }  // size scaled up so visible
+], { height: 220 });
+
+// ─── SIGREG CHART (Total & SIGReg lines) ───
+drawLineChart('chartSigreg', [
+  { color: 'var(--accent)',  points: sigregData.map(d=>[d[0],d[2]]), bestIdx: 68 },  // Total - epoch 69
+  { color: 'var(--accent3)', points: sigregData.map(d=>[d[0],d[1]]), bestIdx: 68 },  // SIGReg
+], { height: 220 });
+
+// ─── SIZE-ONLY CHART ───
+drawLineChart('chartSize', [
+  { color: 'var(--accent2)', points: sizeData.map(d=>[d[0],d[1]]), bestIdx: 53 },
+], { height: 220 });
+
+// Mark the best on size chart separately
+(function() {
+  const svg = document.getElementById('chartSize');
+  // best is epoch 54 = index 53
+  // we add a small label
+  // Already handled by bestIdx dot
+})();
+
+// ─── LR CHART ───
+drawLineChart('chartLR', [
+  { color: 'var(--accent)',  points: lrSigreg, bestIdx: null },
+  { color: 'var(--accent2)', points: lrSize,   bestIdx: null },
+], { height: 180 });
+
+// ─── WIRE UP PLAYBACK BUTTON ───
+document.getElementById('playbackBtn').addEventListener('click', startPlayback);
+
+</script>
+</body>
+</html>
