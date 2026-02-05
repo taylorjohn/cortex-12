@@ -15,7 +15,8 @@ This document provides comprehensive guidance for AI assistants working with the
 - **Grade A compositional generalization** (3/4 tests passed)
 - **CPU-only training** (3.5 hours on AMD Ryzen)
 - **680KB trainable parameters** (vs 428MB for CLIP)
-- **Production model**: `brain_vector_v12_phase3_final.pth`
+
+**Note**: Model weights (`*.pth`, `*.pt`) are gitignored and not included in the repository. Training produces checkpoints in `runs/` directory.
 
 ## Quick Reference
 
@@ -37,17 +38,17 @@ python test_v12_parse.py
 python test_v12_size_compare.py
 python test_v12_compare_stability.py
 
-# Phase 3 training
+# Phase 3 training (default: 150 epochs)
 python train_cortex_phase3_curriculum.py \
   --data_dir data/curriculum \
-  --epochs 200 \
+  --epochs 150 \
   --batch_size 4 \
   --output_dir runs/phase3
 
-# Certification
+# Certification (after training produces a checkpoint)
 python tools/certify_cortex12_phase3.py \
-  --model brain_vector_v12_phase3_final.pth \
-  --num-samples 500
+  --checkpoint runs/phase3/cortex_step_phase3_0050.pt \
+  --data_dir data/balanced_images
 
 # Inference example
 python examples/verify_perception_phase3.py
@@ -105,7 +106,7 @@ cortex-12/
 ├── vl_jepa_llm_v12.py          # Runtime inference
 ├── train_cortex_phase3_curriculum.py  # Phase 3 training
 ├── train_cortex_phase2.py      # Phase 2 training
-├── requirements.txt            # Dependencies (24 packages)
+├── requirements.txt            # Dependencies (19 packages)
 │
 ├── test_v12_*.py               # Standalone test scripts
 ├── run_all_v12_tests.py        # Master test suite
@@ -119,22 +120,30 @@ cortex-12/
 │   └── verify_perception_phase3.py  # Inference demo
 │
 ├── data/curriculum/
-│   ├── labels.json             # Training labels (427KB)
-│   └── images/                 # Training images
+│   └── labels.json             # Training labels (427KB)
+│   # Note: images/ directory must be populated for training
 │
 ├── docs/
 │   ├── ARCHITECTURE.md         # System architecture
 │   ├── TRAINING.md             # Training details
 │   ├── USE_CASES.md            # Application domains
 │   ├── POSITIONING.md          # Market positioning
-│   └── ROADMAP.md              # Future directions
+│   ├── ROADMAP.md              # Future directions
+│   ├── KNOWN_LIMITATIONS.md    # System constraints
+│   ├── NEUROSYMBOLIC_NOTES.md  # Neuro-symbolic integration
+│   ├── architecture.svg        # Architecture diagram
+│   └── diagrams/               # Additional diagrams
 │
 ├── README.md                   # Project overview
 ├── CONTRIBUTING.md             # Contributor guide
 ├── MODEL_CARD.md               # Model specifications
 ├── VISION.md                   # Project philosophy
 ├── POSTTRAIN.md                # Post-training runbook
-└── PHASE3_RESULTS.md           # Phase 3 detailed results
+├── PHASE3_RESULTS.md           # Phase 3 detailed results
+├── AUTHORS.md                  # Project authors
+├── README_v13.md               # Version 13 notes
+├── READMEv2.md                 # Version 2 notes
+└── memory_vector_v12.json      # Semantic memory catalog (see Known Issues)
 ```
 
 ## Code Patterns & Conventions
@@ -217,8 +226,9 @@ CORTEX-12 uses standalone Python scripts (not pytest):
 | `test_v12_parse.py` | Label parsing validation |
 | `test_v12_size_compare.py` | Size invariance testing |
 | `test_v12_compare_stability.py` | SAME vs DIFF stability |
-| `run_all_v12_tests.py` | Run all tests |
-| `tools/simple_comprehensive_test.py` | Phase 3 evaluation |
+| `bench_v12_forward.py` | Forward pass performance benchmark |
+| `run_all_v12_tests.py` | Master runner (runs all above tests) |
+| `tools/simple_comprehensive_test.py` | Phase 3 comprehensive evaluation |
 
 ### Expected Test Output
 
@@ -297,10 +307,10 @@ The following are NOT tracked in git:
 
 ```bash
 # Run certification
-python tools/certify_cortex12_phase3.py --model path/to/model.pth
+python tools/certify_cortex12_phase3.py --checkpoint path/to/model.pt
 
-# Run compositional tests
-python test_compositional_full.py --model path/to/model.pth
+# Run comprehensive test
+python tools/simple_comprehensive_test.py
 ```
 
 ### Add a New Semantic Axis
@@ -394,6 +404,22 @@ The axis schema (`tools/axis_schema_v3.json`) defines dimension ranges and toler
 | Additive Composition | 0.862 | PASS |
 | Cross-Attribute Transfer | 0.998 | PERFECT |
 | **Grade** | **A** | 3/4 passed |
+
+## Known Issues
+
+### memory_vector_v12.json
+
+The `memory_vector_v12.json` file currently contains Python cleanup code instead of valid JSON. The `Cortex12Runtime` class will fail if initialized with the default memory path. This file needs to be regenerated or replaced with a proper JSON semantic memory catalog.
+
+### Training Data
+
+The `data/curriculum/images/` directory is not included in the repository. Training scripts expect this directory to be populated with generated training images. You may need to run image generation scripts or obtain the training dataset separately.
+
+### Model Weights
+
+All model checkpoint files (`*.pth`, `*.pt`) are excluded via `.gitignore`. After training, checkpoints are saved to `runs/` directory. For evaluation or inference, you need to either:
+1. Train a model first using `train_cortex_phase3_curriculum.py`
+2. Obtain pre-trained weights separately
 
 ## References
 
