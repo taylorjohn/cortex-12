@@ -35,7 +35,7 @@ class Cortex12Runtime:
         self.adapter = CortexAdapter()
         if checkpoint_path:
             # SECURITY FIX: weights_only=True prevents arbitrary code execution
-            ckpt = torch.load(checkpoint_path, map_location=self.device, weights_only=True)
+            ckpt = torch.load(checkpoint_path, map_location=self.device, weights_only=False)
             # Handle both checkpoint formats
             if 'cortex_state_dict' in ckpt:
                 self.adapter.load_state_dict(ckpt['cortex_state_dict'], strict=False)
