@@ -110,12 +110,17 @@ This isn't just another vision model — it's **perception as a calibrated scien
 | **Fine-tuning** | Axis-specific (freeze others) | Risk of catastrophic forgetting |
 
 **Use CORTEX-12 when you need**:
+
 - ✅ Verifiable, debuggable vision for safety-critical systems
-- ✅ CPU/edge deployment with limited resources  
+  
+- ✅ CPU/edge deployment with limited resources
+  
 - ✅ Compositional reasoning (novel combinations from primitives)
+  
 - ✅ Explicit semantic control (e.g., "change only color")
 
 ## VL-JEPA VECTOR ALGEBRA IN ACTION
+
 ```
 ───────────────────────────────────────────────────────
 Input embeddings:     red+circle   blue+circle   blue+square
