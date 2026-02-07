@@ -137,3 +137,54 @@ Loading model: runs/cortex_v13_supervised/cortex_v13_supervised_best.pt
 [OK] Model loaded (epoch 95, loss 10.170817315857247)
 
 ```
+
+```
+PS C:\Users\MeteorAI\Desktop\cortex-12> python demo_vl_jepa_robust.py
+======================================================================
+ CORTEX-12 v13 DEMO: VL-JEPA Vector Algebra in Action
+======================================================================
+
+✅ Loading model (680 KB CPU-only)...
+✅ Loading DINOv2 backbone...
+Using cache found in C:\Users\MeteorAI/.cache\torch\hub\facebookresearch_dinov2_main
+C:\Users\MeteorAI/.cache\torch\hub\facebookresearch_dinov2_main\dinov2\layers\swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+C:\Users\MeteorAI/.cache\torch\hub\facebookresearch_dinov2_main\dinov2\layers\attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+C:\Users\MeteorAI/.cache\torch\hub\facebookresearch_dinov2_main\dinov2\layers\block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+
+📸 Finding images in: data/enhanced_5sizes/images
+   Found 54000 images
+
+🧮 Computing: red+square = red+circle - blue+circle + blue+square
+
+======================================================================
+ RESULTS: Compositional Generalization
+======================================================================
+  Full embedding similarity:  1.000 ✓
+  Color subspace (64-79):     1.000 ✓
+  Shape subspace (0-31):      1.000 ✓
+
+  VL-JEPA Threshold: 0.85
+  Status: ✅ PASS
+
+======================================================================
+ 🏆 CORTEX-12 v13 CERTIFICATION
+======================================================================
+  Shape:    100.0%  (6 geometric classes)
+  Color:    100.0%  (12 colors)
+  Size:      98.8%  (5-size task: tiny→huge)
+  Average:   99.6%  🥇 PRODUCTION READY
+
+  Compositional Grade: A+ (4/4 VL-JEPA tests passed)
+  Training Cost: <$0.25 (CPU-only, 100 epochs)
+  Model Size: 680 KB (vs 428 MB for CLIP)
+======================================================================
+
+💡 This proves: Structured representations enable reasoning.
+   Not memorization — true compositional understanding.
+======================================================================
+PS C:\Users\MeteorAI\Desktop\cortex-12>
+
+```
